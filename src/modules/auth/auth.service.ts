@@ -14,6 +14,7 @@ import { ObjectId } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { EmailService } from 'src/common/services/email/email.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
@@ -21,6 +22,7 @@ export class AuthService {
     private userService: UsersService,
     private jwtService: JwtService,
     private readonly emailService: EmailService,
+    private configService: ConfigService,
   ) {}
   async create(payload: CreateAuthDto) {
     try {
@@ -41,7 +43,6 @@ export class AuthService {
       }
       throw new UnauthorizedException();
     } catch (error) {
-      console.log(error);
       if (error instanceof HttpException) {
         throw new BadRequestException(error?.message);
       } else {
@@ -54,14 +55,17 @@ export class AuthService {
     const payload = {
       email: user.email,
       sub: user._id,
-      role: user.roles[0].name,
+      role: user.roles,
     };
     user.password = '';
+
     return {
       status: HttpStatus.OK,
       message: 'Login successful',
       data: {
-        access_token: this.jwtService.sign(payload),
+        access_token: this.jwtService.sign(payload, {
+          secret: this.configService.get<string>('JWT_SECRET'),
+        }),
         user: user,
       },
     };
@@ -84,7 +88,7 @@ export class AuthService {
       const token = this.jwtService.sign(
         { email: user.email, sub: user.id },
         {
-          secret: process.env.JWT_SECRET,
+          secret: this.configService.get<string>('JWT_SECRET'),
           expiresIn: '10m', // Token expires in 10 minutes
         },
       );
@@ -115,7 +119,7 @@ export class AuthService {
   async verifyToken(token: string, payload: any): Promise<any> {
     try {
       const decoded = this.jwtService.verify(token, {
-        secret: process.env.JWT_SECRET,
+        secret: this.configService.get<string>('JWT_SECRET'),
       });
 
       if (!decoded) {
@@ -130,7 +134,7 @@ export class AuthService {
       const newToken = this.jwtService.sign(
         { email: user.email, sub: user.id },
         {
-          secret: process.env.JWT_SECRET,
+          secret: this.configService.get<string>('JWT_SECRET'),
           expiresIn: '3h', // Token expires in 3 hours
         },
       );
@@ -153,7 +157,7 @@ export class AuthService {
   async resetPassword(token: string, payload: any): Promise<any> {
     try {
       const decoded = this.jwtService.verify(token, {
-        secret: process.env.JWT_SECRET,
+        secret: this.configService.get<string>('JWT_SECRET'),
       });
 
       if (!decoded) {

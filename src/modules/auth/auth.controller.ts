@@ -10,12 +10,17 @@ import {
   // UnauthorizedException,
   BadRequestException,
   HttpCode,
+  UseGuards,
+  Request,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto, ValidateUserDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { ObjectId } from 'mongoose';
-import { Request } from 'express';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { Roles } from './auth.decorator';
+import { RolesGuard } from './auth.guard';
+import { ROLES } from './interfaces';
 
 @Controller('auth')
 export class AuthController {
@@ -29,6 +34,16 @@ export class AuthController {
   @Get()
   findAll() {
     return this.authService.findAll();
+  }
+
+  @Post('protected')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.StoreManager)
+  async getProtected(@Request() req: any) {
+    return {
+      message: 'This is a protected route!',
+      user: req.user,
+    };
   }
 
   @Post('/validate-user')
