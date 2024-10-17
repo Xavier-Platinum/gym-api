@@ -19,8 +19,8 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 import { ObjectId } from 'mongoose';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Roles } from './auth.decorator';
-import { RolesGuard } from './auth.guard';
 import { ROLES } from './interfaces';
+import { RolesGuard } from './guards/roles.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -38,7 +38,7 @@ export class AuthController {
 
   @Post('protected')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.SuperAdmin, ROLES.StoreManager)
+  @Roles(ROLES.SuperAdmin, ROLES.User)
   async getProtected(@Request() req: any) {
     return {
       message: 'This is a protected route!',

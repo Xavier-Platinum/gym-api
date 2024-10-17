@@ -19,8 +19,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ObjectId } from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/auth.decorator';
-import { RolesGuard } from '../auth/auth.guard';
 import { ROLES } from '../auth/interfaces';
+import { RolesGuard } from '../auth/guards/roles.guard';
 
 @Controller('users')
 export class UsersController {
