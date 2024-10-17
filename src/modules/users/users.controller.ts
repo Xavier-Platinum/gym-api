@@ -8,6 +8,7 @@ import {
   Delete,
   BadRequestException,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -16,11 +17,10 @@ import {
   UserStatusEnum,
 } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ObjectId } from 'mongoose';
-import { AuthGuard } from '@nestjs/passport';
 import { Roles } from '../auth/decorators/auth.decorator';
 import { ROLES } from '../auth/interfaces';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -32,14 +32,23 @@ export class UsersController {
   }
 
   @Post('/register')
-  // @UseGuards(AuthGuard('jwt'), RolesGuard)
+  // @UseGuards(JwtAuthGuard, RolesGuard)
   // @Roles(ROLES.SuperAdmin, ROLES.User)
   async register(@Body() payload: CreateUserDto) {
     return await this.usersService.create(payload);
   }
 
+  @Get('/profile')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.User)
+  async profile(@Request() req: any) {
+    const user = req.user;
+    console.log(req.user);
+    return await this.usersService.findOne(user._id);
+  }
+
   @Post('/:id/:status')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin)
   async updateUserStatus(
     @Param() param: UpdateStatusDto,
@@ -54,7 +63,7 @@ export class UsersController {
   }
 
   @Get()
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin)
   async findAll(@Param() payload: any) {
     const { page, limit, sort, ...others } = payload;
@@ -67,23 +76,23 @@ export class UsersController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin, ROLES.User)
-  async findOne(@Param('id') id: ObjectId) {
+  async findOne(@Param('id') id: any) {
     return await this.usersService.findOne(id);
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin, ROLES.User)
-  async update(@Param('id') id: ObjectId, @Body() payload: UpdateUserDto) {
+  async update(@Param('id') id: any, @Body() payload: UpdateUserDto) {
     return await this.usersService.update(id, payload);
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin, ROLES.User)
-  async remove(@Param('id') id: ObjectId) {
+  async remove(@Param('id') id: any) {
     return await this.usersService.remove(id);
   }
 }

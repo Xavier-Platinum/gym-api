@@ -16,7 +16,7 @@ export class Role extends Document implements IRole {
   @Prop({ type: [String] })
   permissions: string[];
 
-  @Prop({ type: [{ type: SchemaTypes.ObjectId, ref: 'User' }] })
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'User' }] })
   assignedTo: MongooseSchema.Types.ObjectId[];
 
   @Prop({ default: false })

@@ -183,7 +183,7 @@ export class AuthService {
   }
 
   async changePassword(
-    userId: ObjectId,
+    userId: any,
     oldPassword: string,
     newPassword: string,
   ): Promise<any> {
@@ -212,15 +212,15 @@ export class AuthService {
     return `This action returns all auth`;
   }
 
-  async findOne(id: ObjectId) {
+  async findOne(id: any) {
     return `This action returns a #${id} auth`;
   }
 
-  async update(id: ObjectId, payload: UpdateAuthDto) {
+  async update(id: any, payload: UpdateAuthDto) {
     return `This action updates a #${id} auth`;
   }
 
-  async remove(id: ObjectId) {
+  async remove(id: any) {
     return `This action removes a #${id} auth`;
   }
 }

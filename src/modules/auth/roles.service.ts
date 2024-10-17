@@ -59,7 +59,7 @@ export class RolesService {
     }
   }
 
-  async findOne(id: ObjectId) {
+  async findOne(id: any) {
     try {
       const role = await this.rolesRepository.byQuery(
         { _id: id },
@@ -86,7 +86,7 @@ export class RolesService {
     }
   }
 
-  async update(id: ObjectId, payload: UpdateRoleDto) {
+  async update(id: any, payload: UpdateRoleDto) {
     try {
       const isExist = await this.rolesRepository.exists({ _id: id });
 
@@ -115,7 +115,7 @@ export class RolesService {
     }
   }
 
-  async remove(id: ObjectId) {
+  async remove(id: any) {
     try {
       const isExist = await this.rolesRepository.exists({ _id: id });
 

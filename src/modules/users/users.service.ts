@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto, PaginateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { FilterQuery, ObjectId, Schema, SchemaTypes, Types } from 'mongoose';
+import { FilterQuery, Schema, SchemaTypes, Types } from 'mongoose';
 import { UserRepository } from './entities/user.repository';
 import { EmailService } from 'src/common/services/email/email.service';
 import { RoleRepository } from '../auth/entities/auth.repository';
@@ -201,8 +201,9 @@ export class UsersService {
     }
   }
 
-  async findOne(id: ObjectId): Promise<any> {
+  async findOne(id: string): Promise<any> {
     try {
+      console.log(id);
       const user = await this.userRepository.byQuery(
         { _id: id },
         null,
@@ -232,6 +233,7 @@ export class UsersService {
         data: user,
       };
     } catch (error) {
+      console.log(error);
       if (error instanceof HttpException) {
         throw error;
       }
@@ -239,7 +241,7 @@ export class UsersService {
     }
   }
 
-  async update(id: ObjectId, payload: UpdateUserDto) {
+  async update(id: any, payload: UpdateUserDto) {
     try {
       const isExist = await this.userRepository.exists({ _id: id });
 
@@ -335,7 +337,7 @@ export class UsersService {
   }
 
   async userStatusChange(
-    id: ObjectId,
+    id: any,
     payload: { status: string; reason?: string },
   ) {
     try {
@@ -364,7 +366,7 @@ export class UsersService {
     }
   }
 
-  async remove(id: ObjectId) {
+  async remove(id: any) {
     try {
       const isExist = await this.userRepository.exists({ _id: id });
 

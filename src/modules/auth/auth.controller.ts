@@ -16,7 +16,6 @@ import {
 import { AuthService } from './auth.service';
 import { CreateAuthDto, ValidateUserDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
-import { ObjectId } from 'mongoose';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Roles } from './auth.decorator';
 import { ROLES } from './interfaces';
@@ -94,17 +93,17 @@ export class AuthController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: ObjectId) {
+  findOne(@Param('id') id: any) {
     return this.authService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: ObjectId, @Body() updateAuthDto: UpdateAuthDto) {
+  update(@Param('id') id: any, @Body() updateAuthDto: UpdateAuthDto) {
     return this.authService.update(id, updateAuthDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: ObjectId) {
+  remove(@Param('id') id: any) {
     return this.authService.remove(id);
   }
 }

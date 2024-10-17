@@ -12,8 +12,6 @@ import {
 import { CreateRoleDto } from './dto/create-auth.dto';
 import { UpdateRoleDto } from './dto/update-auth.dto';
 import { RolesService } from './roles.service';
-import { ObjectId } from 'mongoose';
-import { AuthGuard } from '@nestjs/passport';
 import { Roles } from './decorators/auth.decorator';
 import { ROLES } from './interfaces';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -31,26 +29,26 @@ export class RolesController {
   }
 
   @Get()
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin)
   findAll() {
     return this.rolesService.findAll();
   }
 
   @Get(':id')
   @Roles(ROLES.SuperAdmin)
-  findOne(@Param('id') id: ObjectId) {
+  findOne(@Param('id') id: any) {
     return this.rolesService.findOne(id);
   }
 
   @Patch(':id')
   @Roles(ROLES.SuperAdmin)
-  update(@Param('id') id: ObjectId, @Body() payload: UpdateRoleDto) {
+  update(@Param('id') id: any, @Body() payload: UpdateRoleDto) {
     return this.rolesService.update(id, payload);
   }
 
   @Delete(':id')
   @Roles(ROLES.SuperAdmin)
-  remove(@Param('id') id: ObjectId) {
+  remove(@Param('id') id: any) {
     return this.rolesService.remove(id);
   }
 }
