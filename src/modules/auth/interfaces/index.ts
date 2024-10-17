@@ -9,3 +9,10 @@ export interface IRole {
   readonly createdAt?: Schema.Types.Date;
   readonly updatedAt?: Schema.Types.Date;
 }
+
+export enum ROLES {
+  SuperAdmin = 'SuperAdmin',
+  StoreManager = 'storemanager',
+  Operator = 'operator',
+  User = 'User',
+}

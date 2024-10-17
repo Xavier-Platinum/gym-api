@@ -18,11 +18,11 @@ import {
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ObjectId } from 'mongoose';
 import { AuthGuard } from '@nestjs/passport';
-import { Roles } from '../auth/auth.decorator';
+import { Roles } from '../auth/decorators/auth.decorator';
 import { RolesGuard } from '../auth/auth.guard';
+import { ROLES } from '../auth/interfaces';
 
 @Controller('users')
-@UseGuards(AuthGuard('jwt'), RolesGuard)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -31,14 +31,16 @@ export class UsersController {
     return await this.usersService.create(payload);
   }
 
-  @Roles('SuperAdmin', 'User')
   @Post('/register')
+  // @UseGuards(AuthGuard('jwt'), RolesGuard)
+  // @Roles(ROLES.SuperAdmin, ROLES.User)
   async register(@Body() payload: CreateUserDto) {
     return await this.usersService.create(payload);
   }
 
   @Post('/:id/:status')
-  @Roles('SuperAdmin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(ROLES.SuperAdmin)
   async updateUserStatus(
     @Param() param: UpdateStatusDto,
     @Body() payload: { status: string; reason?: string },
@@ -52,7 +54,8 @@ export class UsersController {
   }
 
   @Get()
-  @Roles('SuperAdmin')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(ROLES.SuperAdmin)
   async findAll(@Param() payload: any) {
     const { page, limit, sort, ...others } = payload;
     return await this.usersService.findAll({
@@ -64,19 +67,22 @@ export class UsersController {
   }
 
   @Get(':id')
-  @Roles('SuperAdmin', 'User')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.User)
   async findOne(@Param('id') id: ObjectId) {
     return await this.usersService.findOne(id);
   }
 
   @Patch(':id')
-  @Roles('SuperAdmin', 'User')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.User)
   async update(@Param('id') id: ObjectId, @Body() payload: UpdateUserDto) {
     return await this.usersService.update(id, payload);
   }
 
   @Delete(':id')
-  @Roles('SuperAdmin', 'User')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.User)
   async remove(@Param('id') id: ObjectId) {
     return await this.usersService.remove(id);
   }

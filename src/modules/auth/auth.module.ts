@@ -11,6 +11,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './jwt.strategy';
 import { ServicesModule } from 'src/common/services/services.module';
+import { RolesGuard } from './guards/roles.guard';
 
 @Module({
   imports: [
@@ -25,6 +26,12 @@ import { ServicesModule } from 'src/common/services/services.module';
   ],
   exports: [AuthService, RolesService, RoleRepository],
   controllers: [AuthController, RolesController],
-  providers: [AuthService, RolesService, RoleRepository, JwtStrategy],
+  providers: [
+    AuthService,
+    RolesService,
+    RoleRepository,
+    JwtStrategy,
+    RolesGuard,
+  ],
 })
 export class AuthModule {}
