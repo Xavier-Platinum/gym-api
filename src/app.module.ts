@@ -9,6 +9,8 @@ import { UsersModule } from './modules/users/users.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { ServicesModule } from './common/services/services.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { OrderModule } from './modules/order/order.module';
 
 @Module({
   imports: [
@@ -33,6 +35,8 @@ import { ServicesModule } from './common/services/services.module';
     TransactionsModule,
     SubscriptionsModule,
     ServicesModule,
+    NotificationsModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

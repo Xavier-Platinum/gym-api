@@ -9,6 +9,7 @@ import {
   BadRequestException,
   UseGuards,
   Request,
+  Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -65,7 +66,7 @@ export class UsersController {
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin)
-  async findAll(@Param() payload: any) {
+  async findAll(@Query() payload: any) {
     const { page, limit, sort, ...others } = payload;
     return await this.usersService.findAll({
       page: page,

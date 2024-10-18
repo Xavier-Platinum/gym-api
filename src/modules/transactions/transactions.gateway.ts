@@ -1,4 +1,8 @@
-import { WebSocketGateway, SubscribeMessage, MessageBody } from '@nestjs/websockets';
+import {
+  WebSocketGateway,
+  SubscribeMessage,
+  MessageBody,
+} from '@nestjs/websockets';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
@@ -14,7 +18,7 @@ export class TransactionsGateway {
 
   @SubscribeMessage('findAllTransactions')
   findAll() {
-    return this.transactionsService.findAll();
+    return this.transactionsService.findAll({});
   }
 
   @SubscribeMessage('findOneTransaction')
@@ -24,7 +28,10 @@ export class TransactionsGateway {
 
   @SubscribeMessage('updateTransaction')
   update(@MessageBody() updateTransactionDto: UpdateTransactionDto) {
-    return this.transactionsService.update(updateTransactionDto.id, updateTransactionDto);
+    return this.transactionsService.update(
+      updateTransactionDto.id,
+      updateTransactionDto,
+    );
   }
 
   @SubscribeMessage('removeTransaction')
