@@ -57,6 +57,19 @@ export class SubscriptionsService {
     return orConditions.length > 0 ? { $or: orConditions } : {};
   }
 
+  async getAnalytics(query: object, pagination: object): Promise<any> {
+    const data = await this.subscriptionRepository.paginate({
+      ...pagination,
+      conditions: { ...query },
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Subscriptions found successfully',
+      data,
+    };
+  }
+
   async findAll(payload: PaginateSubsDto) {
     try {
       payload.conditions = this.buildOrQuery(payload.conditions);

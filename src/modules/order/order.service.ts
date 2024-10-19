@@ -29,6 +29,19 @@ export class OrderService {
     };
   }
 
+  async getAnalytics(query: object, pagination: object): Promise<any> {
+    const data = await this.orderRepository.paginate({
+      ...pagination,
+      conditions: { ...query },
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Orders found successfully',
+      data,
+    };
+  }
+
   private async validateSubscriptionsExist(
     items: Array<{ subscriptionId: string; quantity: number }>,
   ) {

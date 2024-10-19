@@ -19,6 +19,19 @@ export class NotificationsService {
     return await notification.save();
   }
 
+  async getAnalytics(query: object, pagination: object): Promise<any> {
+    const data = await this.notificationRepository.paginate({
+      ...pagination,
+      conditions: { ...query },
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Notifications found successfully',
+      data,
+    };
+  }
+
   // Retry sending a failed push notification
   async retryPushNotification(notificationId: string): Promise<void> {
     const notification = await this.notificationRepository.byQuery({

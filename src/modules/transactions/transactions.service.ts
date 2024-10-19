@@ -90,6 +90,19 @@ export class TransactionsService {
     return orConditions.length > 0 ? { $or: orConditions } : {};
   }
 
+  async getAnalytics(query: object, pagination: object): Promise<any> {
+    const data = await this.transactionRepository.paginate({
+      ...pagination,
+      conditions: { ...query },
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Transactions found successfully',
+      data,
+    };
+  }
+
   async findAll(payload: PaginateTransactionDto) {
     try {
       payload.conditions = this.buildOrQuery(payload.conditions);

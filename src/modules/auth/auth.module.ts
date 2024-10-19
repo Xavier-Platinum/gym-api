@@ -38,6 +38,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     RoleRepository,
     JwtStrategy,
     RolesGuard,
+    // EmailService,
   ],
 })
 export class AuthModule {}

@@ -12,6 +12,8 @@ import { ServicesModule } from './common/services/services.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OrderModule } from './modules/order/order.module';
 import { PaymentsModule } from './modules/payments/payments.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -26,10 +28,10 @@ import { PaymentsModule } from './modules/payments/payments.module';
         uri: configService.get<string>('MONGO_URL'),
       }),
     }),
-    // HttpModule.register({
-    //   timeout: 5000,
-    //   maxRedirects: 5,
-    // }),
+    HttpModule.register({
+      timeout: 5000,
+      maxRedirects: 5,
+    }),
     UtilsModule,
     AuthModule,
     UsersModule,
@@ -39,6 +41,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
     NotificationsModule,
     OrderModule,
     PaymentsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

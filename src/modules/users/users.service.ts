@@ -91,6 +91,19 @@ export class UsersService {
     return orConditions.length > 0 ? { $or: orConditions } : {};
   }
 
+  async getAnalytics(query: object, pagination: object): Promise<any> {
+    const data = await this.userRepository.paginate({
+      ...pagination,
+      conditions: { ...query },
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Users found successfully',
+      data,
+    };
+  }
+
   async findAll(payload: PaginateUserDto): Promise<any> {
     try {
       payload.conditions.isDeleted = false;
