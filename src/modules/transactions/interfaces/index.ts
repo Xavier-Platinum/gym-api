@@ -6,11 +6,13 @@ export interface ITransaction {
   orderId: Schema.Types.ObjectId;
   amount: number;
   transactionDate: Date;
+  transactionRef: string;
   paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
-  paymentGateway: 'Stripe' | 'PayPal' | 'Bank';
+  paymentGateway: 'Stripe' | 'Paystack' | 'Flutterwave';
   status: 'completed' | 'pending' | 'failed' | 'refunded';
   retryAttempts: number;
   isRefunded: boolean;
+  paymentMetadata: any;
   refundedAt?: Date;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;

@@ -7,24 +7,39 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
+import { Roles } from '../auth/decorators/auth.decorator';
+import { ROLES } from '../auth/interfaces';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('transactions')
 export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
 
   @Post()
-  create(@Body() payload: CreateTransactionDto) {
-    return this.transactionsService.create(payload);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.User)
+  async create(
+    @Body() payload: CreateTransactionDto,
+    @Req() req: { user: any },
+  ) {
+    console.log(req.user);
+    payload.userId = req.user._id;
+    return await this.transactionsService.create(payload);
   }
 
   @Get()
-  findAll(@Query() payload: any) {
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin)
+  async findAll(@Query() payload: any) {
     const { page, limit, sort, ...others } = payload;
-    return this.transactionsService.findAll({
+    return await this.transactionsService.findAll({
       page: page,
       limit: limit,
       sort: sort,
@@ -32,18 +47,48 @@ export class TransactionsController {
     });
   }
 
+  @Get('/verify')
+  // @Roles(ROLES.SuperAdmin, ROLES.User)
+  async verify(
+    @Query()
+    {
+      transactionRef,
+      gateway,
+      webhook,
+      transaction_id,
+    }: {
+      transactionRef: string;
+      gateway: 'credit_card' | 'paypal' | 'bank_transfer';
+      webhook: boolean;
+      transaction_id: string;
+    },
+  ) {
+    return await this.transactionsService.verifyTransaction(
+      transactionRef,
+      gateway,
+      webhook,
+      transaction_id,
+    );
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: any) {
-    return this.transactionsService.findOne(id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.User)
+  async findOne(@Param('id') id: any) {
+    return await this.transactionsService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: any, @Body() payload: UpdateTransactionDto) {
-    return this.transactionsService.update(id, payload);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin)
+  async update(@Param('id') id: any, @Body() payload: UpdateTransactionDto) {
+    return await this.transactionsService.update(id, payload);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: any) {
-    return this.transactionsService.remove(id);
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin)
+  async remove(@Param('id') id: any) {
+    return await this.transactionsService.remove(id);
   }
 }

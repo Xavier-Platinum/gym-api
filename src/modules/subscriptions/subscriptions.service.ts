@@ -66,7 +66,9 @@ export class SubscriptionsService {
         // populate: [],
       });
 
-      if (!data || data.data.length) {
+      console.log(data);
+
+      if (!data || !data.data.length) {
         throw new NotFoundException('No subscriptions found');
       }
 

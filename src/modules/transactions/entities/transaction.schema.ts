@@ -33,10 +33,16 @@ export class Transaction extends Document implements ITransaction {
   paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
 
   @Prop({
-    enum: ['Stripe', 'PayPal', 'Bank'],
-    default: 'Stripe',
+    enum: ['Stripe', 'Paystack', 'Flutterwave'],
+    default: 'Flutterwave',
   })
-  paymentGateway: 'Stripe' | 'PayPal' | 'Bank';
+  paymentGateway: 'Stripe' | 'Paystack' | 'Flutterwave';
+
+  @Prop({ type: String })
+  transactionRef: string;
+
+  @Prop({ type: String })
+  transaction_id: string;
 
   @Prop({
     enum: ['completed', 'pending', 'failed', 'refunded'],
@@ -47,8 +53,14 @@ export class Transaction extends Document implements ITransaction {
   @Prop({ type: Number, default: 0 })
   retryAttempts: number;
 
+  @Prop({ type: Object })
+  paymentMetadata: any;
+
   @Prop({ type: Boolean, default: false })
   isRefunded: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  webhookVerified: boolean;
 
   @Prop({ type: Date, default: null })
   refundedAt?: Date;

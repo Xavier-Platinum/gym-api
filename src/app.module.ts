@@ -11,6 +11,7 @@ import { SubscriptionsModule } from './modules/subscriptions/subscriptions.modul
 import { ServicesModule } from './common/services/services.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { OrderModule } from './modules/order/order.module';
+import { PaymentsModule } from './modules/payments/payments.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { OrderModule } from './modules/order/order.module';
     ServicesModule,
     NotificationsModule,
     OrderModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

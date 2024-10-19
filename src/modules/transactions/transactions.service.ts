@@ -12,34 +12,68 @@ import {
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { TransactionRepository } from './entities/transaction.repository';
 import { FilterQuery } from 'mongoose';
+import { PaymentGatewayFactory } from '../payments/gateway.factory';
+import { UserRepository } from '../users/entities/user.repository';
+import { OrderRepository } from '../order/entities/order.repository';
 
 @Injectable()
 export class TransactionsService {
-  constructor(private readonly transactionRepository: TransactionRepository) {}
+  constructor(
+    private readonly transactionRepository: TransactionRepository,
+    private readonly paymentGatewayFactory: PaymentGatewayFactory,
+    private readonly userRepository: UserRepository,
+    private readonly order: OrderRepository,
+  ) {}
   async create(payload: CreateTransactionDto) {
     try {
       // TODO: check duplicate by OrderId
-      // const isExists = await this.transactionRepository.exists({
-      //   name: payload.name,
-      // });
+      const isExists = await this.transactionRepository.exists({
+        orderId: payload.orderId,
+      });
 
-      // if (isExists) {
-      //   throw new HttpException('Subscription already exists', 409);
-      // }
+      if (isExists) {
+        throw new HttpException('Transaction already exists', 409);
+      }
 
-      await this.transactionRepository.create({ ...payload });
+      const user = await this.userRepository.byID(payload.userId);
+
+      const transactionRef = await this.generateTransactionRef();
+
+      const paymentGateway = this.paymentGatewayFactory.getGateway(
+        payload?.paymentGateway,
+      );
+
+      const paymentResponse = await paymentGateway.initiatePayment(
+        payload?.amount,
+        user,
+        transactionRef,
+      );
+
+      console.log('HERE>>>> ', paymentResponse);
+
+      await this.transactionRepository.create({
+        ...payload,
+        transactionRef,
+        status: paymentResponse?.status,
+        paymentMetadata: paymentResponse.metadata,
+      });
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: 'Subscription created successfully',
-        data: {},
+        message: 'Transaction created successfully',
+        data: { ...paymentResponse.metadata },
       };
     } catch (error) {
+      console.log('INIT ERROR>>> ', error.response);
       if (error instanceof HttpException) {
         throw error;
       }
       throw new InternalServerErrorException();
     }
+  }
+
+  private async generateTransactionRef(): Promise<string> {
+    return 'TXN-' + Date.now();
   }
 
   private buildOrQuery(
@@ -82,7 +116,7 @@ export class TransactionsService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: 'Subscriptions found successfully',
+        message: 'Transactions found successfully',
         data,
       };
     } catch (error) {
@@ -133,12 +167,46 @@ export class TransactionsService {
     }
   }
 
+  async verifyTransaction(
+    transactionRef: string,
+    gateway: string,
+    webhook: boolean,
+    transaction_id: string,
+  ) {
+    const isExist = await this.transactionRepository.exists({
+      transactionRef: transactionRef,
+    });
+
+    if (!isExist) {
+      throw new NotFoundException('Transaction not found');
+    }
+
+    const paymentGateway = this.paymentGatewayFactory.getGateway(gateway);
+    const verificationResponse =
+      await paymentGateway.verifyPayment(transaction_id);
+
+    await this.transactionRepository.update(
+      { transactionRef: transactionRef },
+      {
+        status: verificationResponse.status,
+        webhookVerified: webhook,
+        paymentMetadata: verificationResponse.metadata,
+      },
+    );
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Transaction verified successfully',
+      data: {},
+    };
+  }
+
   async update(id: any, payload: UpdateTransactionDto) {
     try {
       const isExist = await this.transactionRepository.exists({ _id: id });
 
       if (!isExist) {
-        throw new NotFoundException('Subscription not found');
+        throw new NotFoundException('Transaction not found');
       }
 
       const update = await this.transactionRepository.update(

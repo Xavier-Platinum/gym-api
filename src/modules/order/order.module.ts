@@ -11,7 +11,7 @@ import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
     SubscriptionsModule,
   ],
-  exports: [OrderService],
+  exports: [OrderService, OrderRepository],
   controllers: [OrderController],
   providers: [OrderService, OrderRepository],
 })
