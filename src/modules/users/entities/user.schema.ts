@@ -10,8 +10,32 @@ import { IActivityLog, ISubscription, IUser, IUserRole } from '../interfaces';
   toJSON: { getters: true, virtuals: true, versionKey: false },
 })
 export class User extends Document implements IUser {
+  @Prop({ type: String, default: 'nill' })
+  deviceToken: string;
+
+  @Prop({ type: String, default: '' })
+  state: string;
+
+  @Prop({ type: String, default: '' })
+  address: string;
+
+  @Prop({ type: String, default: '' })
+  ProfilePicture: string;
+
+  @Prop({ type: Object, default: {} })
+  profilePictureMetaData: any;
+
+  @Prop({ type: String, default: '' })
+  googleId: string;
+
+  @Prop({ default: false })
+  confirmed: boolean;
+
+  @Prop({ type: String, default: '' })
+  secretToken: string;
+
   @Prop({ required: true })
-  fullname: string;
+  fullName: string;
 
   @Prop({ required: false })
   username: string;
@@ -20,7 +44,7 @@ export class User extends Document implements IUser {
   email: string;
 
   @Prop({ required: false })
-  phone: string;
+  phoneNumber: string;
 
   @Prop({ required: true, select: false })
   password: string;

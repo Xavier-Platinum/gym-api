@@ -36,6 +36,8 @@ export class EmailService {
         attachments,
       };
 
+      console.log('Mail options>> ', mailOptions);
+
       const result = await this.transporter.sendMail(mailOptions);
       this.logger.log(`Email sent: ${result.messageId}`);
       return result;

@@ -8,8 +8,10 @@ import {
   Delete,
   BadRequestException,
   UseGuards,
-  Request,
   Query,
+  UploadedFile,
+  UseInterceptors,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import {
@@ -22,6 +24,8 @@ import { Roles } from '../auth/decorators/auth.decorator';
 import { ROLES } from '../auth/interfaces';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 
 @Controller('users')
 export class UsersController {
@@ -42,10 +46,10 @@ export class UsersController {
   @Get('/profile')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin, ROLES.User)
-  async profile(@Request() req: any) {
-    const user = req.user;
+  async profile(@Req() req: Request) {
+    const user = req.user as any;
     console.log(req.user);
-    return await this.usersService.findOne(user._id);
+    return await this.usersService.findOne(user?._id);
   }
 
   @Post('/:id/:status')
@@ -61,6 +65,18 @@ export class UsersController {
       throw new BadRequestException('Reason is required for ban');
     }
     return await this.usersService.userStatusChange(param.id, payload);
+  }
+
+  @Post('upload')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadProfilePicture(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: { user: any },
+  ) {
+    const id = req.user._id;
+    return this.usersService.updateProfilePicture(id, file.path);
   }
 
   @Get()

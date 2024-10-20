@@ -13,6 +13,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { ServicesModule } from 'src/common/services/services.module';
 import { RolesGuard } from './guards/roles.guard';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { GoogleStrategy } from './google.strategy';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     RoleRepository,
     JwtStrategy,
     RolesGuard,
+    GoogleStrategy,
     // EmailService,
   ],
 })

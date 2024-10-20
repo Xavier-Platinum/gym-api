@@ -7,6 +7,7 @@ import {
   MinLength,
   IsMongoId,
   IsArray,
+  Length,
 } from 'class-validator';
 
 export class CreateAuthDto {}
@@ -31,4 +32,18 @@ export class CreateRoleDto {
   @IsString({ each: true })
   @IsOptional()
   permissions: string[];
+}
+export class VerifyOtpDto {
+  @IsEmail()
+  @IsOptional()
+  email?: string;
+
+  @IsString()
+  @Length(6, 6)
+  otp: string;
+}
+
+export class ResendOtpDto {
+  @IsEmail()
+  email: string;
 }

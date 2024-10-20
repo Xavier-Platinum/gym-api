@@ -29,8 +29,8 @@ export class FlutterwaveService implements PaymentGateway {
         customer: {
           email: user?.email,
           id: user?.id,
-          name: user?.fullname,
-          phone_number: user?.phone,
+          name: user?.fullName,
+          phone_number: user?.phoneNumber,
         },
       };
 

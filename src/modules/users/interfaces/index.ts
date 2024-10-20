@@ -24,11 +24,13 @@ export interface IActivityLog {
 
 export interface IUser {
   readonly _id?: Schema.Types.ObjectId | any;
-  fullname: string;
+  fullName: string;
   username: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   password: string;
+  state: string;
+  address: string;
   status?: string;
   statusReason?: string;
   roles: IUserRole[];
@@ -36,6 +38,12 @@ export interface IUser {
   activityLogs: IActivityLog[];
   aboutMe: Map<string, string>;
   isDeleted: boolean;
+  ProfilePicture: string;
+  profilePictureMetaData: object;
+  googleId: string;
+  deviceToken: string;
+  confirmed: boolean;
+  secretToken: string;
   deletedAt: Date;
   readonly createdAt?: Schema.Types.Date;
   readonly updatedAt?: Schema.Types.Date;

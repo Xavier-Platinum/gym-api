@@ -17,12 +17,12 @@ export enum UserStatusEnum {
 
 export class CreateUserDto {
   @IsString()
-  @Length(4, 20)
-  username: string;
+  @Length(11)
+  phoneNumber: string;
 
   @IsString()
   @Length(2, 50)
-  fullname: string;
+  fullName: string;
 
   @IsEmail()
   email: string;
@@ -34,6 +34,22 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   role?: string;
+
+  @IsOptional()
+  @IsString()
+  state?: string;
+
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  readonly googleId?: string;
+
+  readonly ProfilePicture?: string;
+
+  readonly accessToken?: string;
+
+  readonly refreshToken?: string;
 }
 
 export class UpdateStatusDto {

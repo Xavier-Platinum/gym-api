@@ -6,6 +6,7 @@ import { User, UserSchema } from './entities/user.schema';
 import { UserRepository } from './entities/user.repository';
 import { AuthModule } from '../auth/auth.module';
 import { ServicesModule } from 'src/common/services/services.module';
+import { CloudinaryService } from 'src/common/services/cloudinary/cloudinary.service';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { ServicesModule } from 'src/common/services/services.module';
     ServicesModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService, UserRepository],
-  exports: [UsersService, UserRepository],
+  providers: [UsersService, UserRepository, CloudinaryService],
+  exports: [UsersService, UserRepository, CloudinaryService],
 })
 export class UsersModule {}

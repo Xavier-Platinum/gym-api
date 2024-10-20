@@ -15,6 +15,11 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { EmailService } from 'src/common/services/email/email.service';
 import { ConfigService } from '@nestjs/config';
+import { CloudinaryService } from 'src/common/services/cloudinary/cloudinary.service';
+import * as moment from 'moment';
+import { UserRepository } from '../users/entities/user.repository';
+import { RoleRepository } from './entities/auth.repository';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -23,7 +28,233 @@ export class AuthService {
     private jwtService: JwtService,
     private readonly emailService: EmailService,
     private configService: ConfigService,
+    private readonly uploadService: CloudinaryService,
+    private readonly userRepository: UserRepository,
+    private readonly rolesRepository: RoleRepository,
   ) {}
+
+  private otps: Map<string, { otp: string; expiration: Date; email: string }> =
+    new Map();
+
+  generateOtp(): string {
+    const now = new Date();
+    const otp = (now.getTime() % 1000000).toString().padStart(6, '0');
+    return otp;
+  }
+
+  async sendOtp(email: string): Promise<any> {
+    const otp = this.generateOtp();
+    const expiration = moment().add(10, 'minutes').toDate();
+    this.otps.set(otp, { otp, expiration, email });
+
+    await this.userService.updateOtp(email, { secretToken: otp.toString() });
+
+    console.log(`Sending OTP ${otp} to email: ${email}`);
+
+    return otp;
+  }
+
+  // Verify OTP
+  async verifyOtp(otp: string): Promise<boolean> {
+    const record = this.otps.get(otp);
+
+    if (!record) {
+      throw new BadRequestException('No OTP was sent to this email.');
+    }
+
+    const { otp: savedOtp, expiration, email: savedEmail } = record;
+
+    if (moment().isAfter(expiration)) {
+      this.otps.delete(savedOtp);
+      throw new BadRequestException('OTP has expired.');
+    }
+
+    if (savedOtp !== otp) {
+      throw new BadRequestException('Invalid OTP.');
+    }
+
+    await this.userService.updateOtp(savedEmail, {
+      secretToken: 'null',
+      status: 'active',
+      confirmed: true,
+    });
+
+    await this.emailService.sendMail(
+      savedEmail,
+      'Verification successful',
+      'Your account has been verified successfully',
+      `<div>
+        <h1>Your account has been verified successfully.</h1>
+      </div>`,
+      // attachments,
+    );
+
+    // Remove OTP after successful verification
+    this.otps.delete(savedOtp);
+    return true;
+  }
+
+  async register(payload: CreateUserDto) {
+    try {
+      const isExist = await this.userRepository.exists({
+        $or: [
+          { email: payload?.email },
+          { fullName: payload?.fullName },
+          { phoneNumber: payload?.phoneNumber },
+        ],
+      });
+
+      if (isExist) {
+        throw new BadRequestException('User already exists');
+      }
+
+      const role = await this.rolesRepository.byQuery({ name: 'User' });
+
+      // TODO: Implement attachments
+      const attachments = [
+        // {
+        //   filename: 'example.pdf',
+        //   path: './path-to-file/example.pdf',
+        // },
+        // {
+        //   filename: 'image.png',
+        //   path: './path-to-image/image.png',
+        //   cid: 'unique@image.cid',
+        // },
+      ];
+
+      const user = await this.userRepository.create({
+        ...payload,
+        roles: [
+          {
+            roleId: role.id,
+            customPermissions: [],
+          },
+        ],
+        // secretToken: otp.toString(),
+        // status: 'pending',
+        // confirmed: false,
+      });
+      const otp = await this.sendOtp(payload?.email);
+      await this.emailService.sendMail(
+        payload?.email,
+        'Registration successful',
+        'Your account has been registered successfully',
+        `<div>
+          <h1>Your account has been registered successfully.</h1>
+          <p>To verify your email, please use the token below</p>
+          <span>${otp}</span>
+        </div>`,
+        // attachments,
+      );
+
+      return {
+        statusCode: HttpStatus.CREATED,
+        message:
+          'User created successfully, please verify account with token sent to your email',
+        // data: user,
+      };
+    } catch (error) {
+      console.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException();
+    }
+  }
+
+  // Resend OTP
+  async resendOtp(email: string): Promise<string> {
+    const user = await this.userService.findUserByEmail(email);
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    if (user?.confirmed) {
+      // check status also
+      throw new BadRequestException('User has already confirmed their email.');
+    }
+
+    const record = this.otps.get(email);
+    if (record && moment().isBefore(record.expiration)) {
+      throw new BadRequestException(
+        'You can only request a new OTP after the previous one expires.',
+      );
+    }
+
+    // Generate and send new OTP
+    return await this.sendOtp(email);
+  }
+
+  async validateOAuthLogin(
+    email: string,
+    fullName: string,
+    googleId: any,
+    ProfilePicture: any,
+    phoneNumber: string,
+    firstName?: string,
+    profilePictureMetaData?: any,
+    lastName?: string,
+    accessToken?: any,
+    refreshToken?: any,
+  ): Promise<any> {
+    try {
+      const user = await this.userService.findUserByEmail(email);
+
+      if (!user) {
+        // If the user doesn't exist, create a new one
+        const newUser = await this.userService.create({
+          email,
+          fullName,
+          googleId,
+          ProfilePicture,
+          phoneNumber,
+          // accessToken,
+          // refreshToken,
+          password: '',
+        });
+        return {
+          statusCode: HttpStatus.OK,
+          message: 'Successfully signed up',
+          data: {
+            accessToken: this.jwtService.sign(
+              {
+                email: newUser?.data?.email,
+                sub: newUser?.data?._id,
+                role: newUser?.data?.roles,
+              },
+              {
+                secret: this.configService.get<string>('JWT_SECRET'),
+              },
+            ),
+            user,
+          },
+        };
+      }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Successfully signed in',
+        data: {
+          accessToken: this.jwtService.sign(
+            {
+              email: user.email,
+              sub: user._id,
+              role: user.roles,
+            },
+            {
+              secret: this.configService.get<string>('JWT_SECRET'),
+            },
+          ),
+          user,
+        },
+      };
+    } catch (err) {
+      throw new BadRequestException('Failed to validate OAuth login');
+    }
+  }
+
   async create(payload: CreateAuthDto) {
     try {
       return 'This action adds a new auth';

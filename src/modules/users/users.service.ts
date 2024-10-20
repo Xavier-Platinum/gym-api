@@ -13,6 +13,8 @@ import { FilterQuery, Schema, SchemaTypes, Types } from 'mongoose';
 import { UserRepository } from './entities/user.repository';
 import { EmailService } from 'src/common/services/email/email.service';
 import { RoleRepository } from '../auth/entities/auth.repository';
+import { CloudinaryService } from 'src/common/services/cloudinary/cloudinary.service';
+import { AuthService } from '../auth/auth.service';
 
 @Injectable()
 export class UsersService {
@@ -20,11 +22,26 @@ export class UsersService {
     private readonly userRepository: UserRepository,
     private readonly emailService: EmailService,
     private readonly rolesRepository: RoleRepository,
+    private readonly uploadService: CloudinaryService,
   ) {}
+
+  async updateOtp(email: string, payload: any): Promise<void> {
+    console.log('Updating ', email, payload);
+    await this.userRepository.update(
+      { email: email },
+      {
+        ...payload,
+      },
+    );
+  }
   async create(payload: CreateUserDto) {
     try {
       const isExist = await this.userRepository.exists({
-        $or: [{ email: payload?.email }, { fullname: payload?.fullname }],
+        $or: [
+          { email: payload?.email },
+          { fullName: payload?.fullName },
+          { phoneNumber: payload?.phoneNumber },
+        ],
       });
 
       if (isExist) {
@@ -89,6 +106,39 @@ export class UsersService {
     }
 
     return orConditions.length > 0 ? { $or: orConditions } : {};
+  }
+
+  async updateProfilePicture(userId: any, file: any) {
+    const user = await this.userRepository.byID(userId);
+
+    // Delete the previous profile picture if it exists
+    if (user?.profilePictureMetaData?.publicId) {
+      await this.uploadService.deleteImage(
+        user?.profilePictureMetaData?.publicId,
+      );
+    }
+
+    // Upload the new profile picture
+    const uploadResult = await this.uploadService.uploadImage(
+      file,
+      'profile_pictures',
+    );
+
+    // Update the user's profile picture URL and public ID in the database
+    await this.userRepository.update(
+      { _id: userId },
+      {
+        ProfilePicture: uploadResult.secure_url,
+        profilePictureMetaData: {
+          publicId: uploadResult.public_id,
+        },
+      },
+    );
+
+    return {
+      message: 'Profile picture updated successfully',
+      url: uploadResult.secure_url,
+    };
   }
 
   async getAnalytics(query: object, pagination: object): Promise<any> {
@@ -284,8 +334,8 @@ export class UsersService {
   async createSuperAdmin(payload: {
     email: string;
     password: string;
-    fullname: string;
-    phone: string;
+    fullName: string;
+    phoneNumber: string;
   }): Promise<any> {
     try {
       const isUserExists = await this.userRepository.exists({
@@ -299,9 +349,9 @@ export class UsersService {
       const superAdmin = {
         email: payload.email,
         password: payload.password,
-        fullname: payload.fullname,
+        fullName: payload.fullName,
         role: 'SuperAdmin',
-        phone: payload.phone,
+        phoneNumber: payload.phoneNumber,
       };
 
       const data = await this.userRepository.create(superAdmin);
