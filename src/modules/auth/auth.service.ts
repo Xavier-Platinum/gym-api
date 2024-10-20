@@ -16,7 +16,7 @@ import { UsersService } from '../users/users.service';
 import { EmailService } from 'src/common/services/email/email.service';
 import { ConfigService } from '@nestjs/config';
 import { CloudinaryService } from 'src/common/services/cloudinary/cloudinary.service';
-import * as moment from 'moment';
+import moment from 'moment';
 import { UserRepository } from '../users/entities/user.repository';
 import { RoleRepository } from './entities/auth.repository';
 import { CreateUserDto } from '../users/dto/create-user.dto';
