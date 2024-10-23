@@ -173,9 +173,59 @@ export class TransactionsService {
         data: sub,
       };
     } catch (error) {
+      if (error instanceof Error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+
       if (error instanceof HttpException) {
         throw error;
       }
+
+      throw new InternalServerErrorException();
+    }
+  }
+
+  async history(userId: any) {
+    try {
+      const sub = await this.transactionRepository.byQuery(
+        {
+          userId: userId,
+        },
+        null,
+        null,
+        [
+          {
+            path: 'userId',
+            model: 'User',
+            select: '-createdAt -updatedAt',
+          },
+          {
+            path: 'orderId',
+            model: 'Order',
+            select: '-createdAt -updatedAt',
+          },
+        ],
+        '-createdAt',
+      );
+
+      if (!sub) {
+        throw new NotFoundException('Subscription not found');
+      }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Subscription history',
+        data: sub,
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
       throw new InternalServerErrorException();
     }
   }

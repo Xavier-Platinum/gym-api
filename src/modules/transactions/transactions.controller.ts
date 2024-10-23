@@ -78,6 +78,13 @@ export class TransactionsController {
     return await this.transactionsService.findOne(id);
   }
 
+  @Get('/user/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.User)
+  async history(@Param('userId') id: any) {
+    return await this.transactionsService.history(id);
+  }
+
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin)
