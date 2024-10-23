@@ -1,5 +1,19 @@
 import { Schema } from 'mongoose';
 
+export interface IAddOn {
+  _id: Schema.Types.ObjectId | any;
+  name: string;
+  image: {
+    publicId: string;
+    imageValue: string;
+  };
+  price: number;
+  description: string;
+  isArchived: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface ISubscription {
   readonly _id: Schema.Types.ObjectId | any;
   type: string;

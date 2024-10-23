@@ -81,3 +81,20 @@ export class PaginateSubsDto {
   @IsObject()
   conditions?: object | any;
 }
+
+export class CreateAddonDto {
+  @IsString()
+  name: string;
+
+  @ValidateNested()
+  @Type(() => ImageDto)
+  image?: ImageDto;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsNumber()
+  @Type(() => Number)
+  price: number;
+}

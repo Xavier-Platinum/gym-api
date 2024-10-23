@@ -1,5 +1,8 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateSubscriptionDto } from './create-subscription.dto';
+import {
+  CreateSubscriptionDto,
+  CreateAddonDto,
+} from './create-subscription.dto';
 
 export class UpdateSubscriptionDto extends PartialType(CreateSubscriptionDto) {
   name?: string;
@@ -15,3 +18,5 @@ export class UpdateSubscriptionDto extends PartialType(CreateSubscriptionDto) {
   services?: string[];
   isArchived?: boolean;
 }
+
+export class UpdateAddonDto extends PartialType(CreateAddonDto) {}

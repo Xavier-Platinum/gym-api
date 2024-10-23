@@ -5,36 +5,34 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  CreateSubscriptionDto,
-  PaginateSubsDto,
-} from './dto/create-subscription.dto';
-import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
-import { SubscriptionRepository } from './entities/subscription.repository';
-import { FilterQuery } from 'mongoose';
 import { CloudinaryService } from 'src/common/services/cloudinary/cloudinary.service';
+import { AddonRepository } from '../../entities/subscription.repository';
+import {
+  CreateAddonDto,
+  PaginateSubsDto,
+} from '../../dto/create-subscription.dto';
+import { FilterQuery } from 'mongoose';
+import { UpdateAddonDto } from '../../dto/update-subscription.dto';
 
 @Injectable()
-export class SubscriptionsService {
+export class AddonsService {
   constructor(
-    private readonly subscriptionRepository: SubscriptionRepository,
     private readonly uploadService: CloudinaryService,
+    private readonly addonRepository: AddonRepository,
   ) {}
-  async create(payload: CreateSubscriptionDto, image: Express.Multer.File) {
+
+  async create(payload: CreateAddonDto, image: Express.Multer.File) {
     try {
-      const isExists = await this.subscriptionRepository.exists({
+      const isExists = await this.addonRepository.exists({
         name: payload.name,
       });
 
       if (isExists) {
-        throw new HttpException('Subscription already exists', 409);
+        throw new HttpException('Addon already exists', 409);
       }
 
       if (image) {
-        const response = await this.uploadService.uploadImage(
-          image,
-          'subscriptions',
-        );
+        const response = await this.uploadService.uploadImage(image, 'addons');
 
         payload.image = {
           publicId: response.public_id,
@@ -42,11 +40,11 @@ export class SubscriptionsService {
         };
       }
 
-      await this.subscriptionRepository.create({ ...payload });
+      await this.addonRepository.create({ ...payload });
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: 'Subscription created successfully',
+        message: 'Addon created successfully',
         data: {},
       };
     } catch (error) {
@@ -73,14 +71,14 @@ export class SubscriptionsService {
   }
 
   async getAnalytics(query: object, pagination: object): Promise<any> {
-    const data = await this.subscriptionRepository.paginate({
+    const data = await this.addonRepository.paginate({
       ...pagination,
       conditions: { ...query },
     });
 
     return {
       statusCode: 200,
-      message: 'Subscriptions found successfully',
+      message: 'Addons found successfully',
       data,
     };
   }
@@ -89,18 +87,18 @@ export class SubscriptionsService {
     try {
       payload.conditions = this.buildOrQuery(payload.conditions);
 
-      const data = await this.subscriptionRepository.paginate({
+      const data = await this.addonRepository.paginate({
         ...payload,
         // populate: [],
       });
 
       if (!data || !data.data.length) {
-        throw new NotFoundException('No subscriptions found');
+        throw new NotFoundException('No addon found');
       }
 
       return {
         statusCode: HttpStatus.OK,
-        message: 'Subscriptions found successfully',
+        message: 'Addons found successfully',
         data,
       };
     } catch (error) {
@@ -113,7 +111,7 @@ export class SubscriptionsService {
 
   async findOne(id: any) {
     try {
-      const sub = await this.subscriptionRepository.byQuery(
+      const sub = await this.addonRepository.byQuery(
         {
           _id: id,
         },
@@ -124,12 +122,12 @@ export class SubscriptionsService {
       );
 
       if (!sub) {
-        throw new NotFoundException('Subscription not found');
+        throw new NotFoundException('Addon not found');
       }
 
       return {
         statusCode: HttpStatus.OK,
-        message: 'Subscription found successfully',
+        message: 'Addon found successfully',
         data: sub,
       };
     } catch (error) {
@@ -140,16 +138,12 @@ export class SubscriptionsService {
     }
   }
 
-  async update(
-    id: any,
-    payload: UpdateSubscriptionDto,
-    image: Express.Multer.File,
-  ) {
+  async update(id: any, payload: UpdateAddonDto, image: Express.Multer.File) {
     try {
-      const isExist = await this.subscriptionRepository.byID(id, null, null);
+      const isExist = await this.addonRepository.byID(id, null, null);
 
       if (!isExist) {
-        throw new NotFoundException('Subscription not found');
+        throw new NotFoundException('Addon not found');
       }
 
       if (image) {
@@ -159,10 +153,7 @@ export class SubscriptionsService {
         }
 
         // Upload new image
-        const response = await this.uploadService.uploadImage(
-          image,
-          'subscriptions',
-        );
+        const response = await this.uploadService.uploadImage(image, 'addons');
 
         payload.image = {
           publicId: response.public_id,
@@ -170,7 +161,7 @@ export class SubscriptionsService {
         };
       }
 
-      const update = await this.subscriptionRepository.findAndUpdate(
+      const update = await this.addonRepository.findAndUpdate(
         { _id: id },
         {
           payload,
@@ -179,7 +170,7 @@ export class SubscriptionsService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: 'Subscription updated successfully',
+        message: 'Addon updated successfully',
         data: update,
       };
     } catch (error) {
@@ -192,14 +183,14 @@ export class SubscriptionsService {
 
   async remove(id: any) {
     try {
-      const isExist = await this.subscriptionRepository.byID(id, null, null);
+      const isExist = await this.addonRepository.byID(id, null, null);
 
       if (!isExist) {
-        throw new NotFoundException('Subscription not found');
+        throw new NotFoundException('Addon not found');
       }
 
       await Promise.all([
-        await this.subscriptionRepository.update(
+        await this.addonRepository.update(
           { _id: id },
           {
             isArchived: true,
@@ -211,7 +202,7 @@ export class SubscriptionsService {
 
       return {
         statusCode: HttpStatus.OK,
-        message: 'Subscription deleted successfully',
+        message: 'Addon deleted successfully',
         data: {},
       };
     } catch (error) {

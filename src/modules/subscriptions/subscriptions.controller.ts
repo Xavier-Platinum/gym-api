@@ -32,19 +32,19 @@ export class SubscriptionsController {
     }),
   )
   @Roles(ROLES.SuperAdmin)
-  create(
+  async create(
     @Body() payload: CreateSubscriptionDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
     console.log(payload);
-    return this.subscriptionsService.create(payload, image);
+    return await this.subscriptionsService.create(payload, image);
   }
 
   @Get()
   @Roles(ROLES.SuperAdmin, ROLES.User)
-  findAll(@Query() payload: any) {
+  async findAll(@Query() payload: any) {
     const { page, limit, sort, ...others } = payload;
-    return this.subscriptionsService.findAll({
+    return await this.subscriptionsService.findAll({
       page: page,
       limit: limit,
       sort: sort,
@@ -53,9 +53,9 @@ export class SubscriptionsController {
   }
 
   @Get(':id')
-  @Roles(ROLES.SuperAdmin)
-  findOne(@Param('id') id: any) {
-    return this.subscriptionsService.findOne(id);
+  @Roles(ROLES.SuperAdmin, ROLES.User)
+  async findOne(@Param('id') id: any) {
+    return await this.subscriptionsService.findOne(id);
   }
 
   @Patch(':id')
@@ -65,17 +65,17 @@ export class SubscriptionsController {
     }),
   )
   @Roles(ROLES.SuperAdmin)
-  update(
+  async update(
     @Param('id') id: any,
     @Body() payload: UpdateSubscriptionDto,
     @UploadedFile() image: Express.Multer.File,
   ) {
-    return this.subscriptionsService.update(id, payload, image);
+    return await this.subscriptionsService.update(id, payload, image);
   }
 
   @Delete(':id')
   @Roles(ROLES.SuperAdmin)
-  remove(@Param('id') id: any) {
-    return this.subscriptionsService.remove(id);
+  async remove(@Param('id') id: any) {
+    return await this.subscriptionsService.remove(id);
   }
 }
