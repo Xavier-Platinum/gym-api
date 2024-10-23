@@ -31,7 +31,7 @@ export class SubscriptionsController {
       limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
     }),
   )
-  // @Roles(ROLES.SuperAdmin)
+  @Roles(ROLES.SuperAdmin)
   create(
     @Body() payload: CreateSubscriptionDto,
     @UploadedFile() image: Express.Multer.File,
