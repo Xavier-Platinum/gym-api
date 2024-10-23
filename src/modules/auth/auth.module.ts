@@ -24,7 +24,7 @@ import { GoogleStrategy } from './google.strategy';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '60m' },
+        signOptions: { expiresIn: '600000m' },
       }),
     }),
     MongooseModule.forFeature([{ name: Role.name, schema: RoleSchema }]),
