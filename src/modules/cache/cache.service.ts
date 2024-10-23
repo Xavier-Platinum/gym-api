@@ -5,10 +5,12 @@ import * as Redis from 'ioredis';
 export class CacheService {
   private client: Redis.Redis;
 
+  // NOTE:  After debug put this data into environment variables
   constructor() {
     this.client = new Redis.Redis({
-      host: 'localhost',
-      port: 6379,
+      host: 'redis-10437.c82.us-east-1-2.ec2.redns.redis-cloud.com',
+      port: 10437, // 6379
+      password: 'JyoTEqz9n9Sso7yQ0reyVAHHSJ7mC2M6',
     });
   }
 
