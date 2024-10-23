@@ -219,7 +219,7 @@ export class TransactionsService {
       };
     } catch (error) {
       if (error instanceof Error) {
-        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
       }
 
       if (error instanceof HttpException) {
