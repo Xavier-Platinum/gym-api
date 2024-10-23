@@ -8,6 +8,8 @@ import {
   Delete,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { SubscriptionsService } from './subscriptions.service';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
@@ -16,6 +18,7 @@ import { Roles } from '../auth/decorators/auth.decorator';
 import { ROLES } from '../auth/interfaces';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('subscriptions')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -23,10 +26,18 @@ export class SubscriptionsController {
   constructor(private readonly subscriptionsService: SubscriptionsService) {}
 
   @Post()
-  @Roles(ROLES.SuperAdmin)
-  create(@Body() payload: CreateSubscriptionDto) {
+  @UseInterceptors(
+    FileInterceptor('image', {
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    }),
+  )
+  // @Roles(ROLES.SuperAdmin)
+  create(
+    @Body() payload: CreateSubscriptionDto,
+    @UploadedFile() image: Express.Multer.File,
+  ) {
     console.log(payload);
-    return this.subscriptionsService.create(payload);
+    return this.subscriptionsService.create(payload, image);
   }
 
   @Get()
@@ -48,9 +59,18 @@ export class SubscriptionsController {
   }
 
   @Patch(':id')
+  @UseInterceptors(
+    FileInterceptor('image', {
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+    }),
+  )
   @Roles(ROLES.SuperAdmin)
-  update(@Param('id') id: any, @Body() payload: UpdateSubscriptionDto) {
-    return this.subscriptionsService.update(id, payload);
+  update(
+    @Param('id') id: any,
+    @Body() payload: UpdateSubscriptionDto,
+    @UploadedFile() image: Express.Multer.File,
+  ) {
+    return this.subscriptionsService.update(id, payload, image);
   }
 
   @Delete(':id')

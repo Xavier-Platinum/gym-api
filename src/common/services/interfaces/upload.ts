@@ -1,4 +1,4 @@
 export interface ImageService {
-  uploadImage(file: string, folder: string): Promise<any>;
+  uploadImage(file: Express.Multer.File, folder: string): Promise<any>;
   deleteImage(publicId: string): Promise<any>;
 }

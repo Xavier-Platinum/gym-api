@@ -8,19 +8,23 @@ import {
   SubscriptionSchema,
 } from './entities/subscription.schema';
 import { SubscriptionRepository } from './entities/subscription.repository';
+import { ServicesModule } from 'src/common/services/services.module';
+import { CloudinaryService } from 'src/common/services/cloudinary/cloudinary.service';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Subscription.name, schema: SubscriptionSchema },
     ]),
+    ServicesModule,
   ],
   controllers: [SubscriptionsController],
   providers: [
     SubscriptionsService,
     SubscriptionsGateway,
     SubscriptionRepository,
+    CloudinaryService,
   ],
-  exports: [SubscriptionsService, SubscriptionRepository],
+  exports: [SubscriptionsService, SubscriptionRepository, CloudinaryService],
 })
 export class SubscriptionsModule {}

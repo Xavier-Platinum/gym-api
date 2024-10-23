@@ -4,6 +4,10 @@ export interface ISubscription {
   readonly _id: Schema.Types.ObjectId | any;
   type: string;
   name: string;
+  image: {
+    publicId: string;
+    imageValue: string;
+  };
   description: string;
   price: number;
   durationInMonths: number;

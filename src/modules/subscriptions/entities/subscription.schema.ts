@@ -10,6 +10,9 @@ import { IRenewalSettings, ISubscription } from '../interfaces';
   toJSON: { getters: true, virtuals: true, versionKey: false },
 })
 export class Subscription extends Document implements ISubscription {
+  @Prop({ type: { publicId: { type: String }, imageValue: { type: String } } })
+  image: { publicId: string; imageValue: string };
+
   @Prop({ required: false })
   type: string;
 

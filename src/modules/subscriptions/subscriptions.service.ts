@@ -12,13 +12,15 @@ import {
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { SubscriptionRepository } from './entities/subscription.repository';
 import { FilterQuery } from 'mongoose';
+import { CloudinaryService } from 'src/common/services/cloudinary/cloudinary.service';
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
     private readonly subscriptionRepository: SubscriptionRepository,
+    private readonly uploadService: CloudinaryService,
   ) {}
-  async create(payload: CreateSubscriptionDto) {
+  async create(payload: CreateSubscriptionDto, image: Express.Multer.File) {
     try {
       const isExists = await this.subscriptionRepository.exists({
         name: payload.name,
@@ -26,6 +28,18 @@ export class SubscriptionsService {
 
       if (isExists) {
         throw new HttpException('Subscription already exists', 409);
+      }
+
+      if (image) {
+        const response = await this.uploadService.uploadImage(
+          image,
+          'subscriptions',
+        );
+
+        payload.image = {
+          publicId: response.public_id,
+          imageValue: response.secure_url,
+        };
       }
 
       await this.subscriptionRepository.create({ ...payload });
@@ -36,8 +50,9 @@ export class SubscriptionsService {
         data: {},
       };
     } catch (error) {
+      console.log(error);
       if (error instanceof HttpException) {
-        throw error;
+        throw new HttpException(error.message, error?.getStatus());
       }
       throw new InternalServerErrorException();
     }
@@ -127,12 +142,34 @@ export class SubscriptionsService {
     }
   }
 
-  async update(id: any, payload: UpdateSubscriptionDto) {
+  async update(
+    id: any,
+    payload: UpdateSubscriptionDto,
+    image: Express.Multer.File,
+  ) {
     try {
-      const isExist = await this.subscriptionRepository.exists({ _id: id });
+      const isExist = await this.subscriptionRepository.byID(id, null, null);
 
       if (!isExist) {
         throw new NotFoundException('Subscription not found');
+      }
+
+      if (image) {
+        // Deleting old image
+        if (isExist?.image && isExist?.image?.publicId) {
+          await this.uploadService.deleteImage(isExist?.image?.publicId);
+        }
+
+        // Upload new image
+        const response = await this.uploadService.uploadImage(
+          image,
+          'subscriptions',
+        );
+
+        payload.image = {
+          publicId: response.public_id,
+          imageValue: response.secure_url,
+        };
       }
 
       const update = await this.subscriptionRepository.update(

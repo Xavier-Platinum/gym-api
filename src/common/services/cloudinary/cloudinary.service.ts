@@ -13,12 +13,12 @@ export class CloudinaryService implements ImageService {
     });
   }
 
-  async uploadImage(file: string, folder: string): Promise<any> {
-    return new Promise((resolve, reject) => {
-      cloudinary.uploader.upload(file, { folder }, (error, result) => {
+  async uploadImage(file: Express.Multer.File, folder: string): Promise<any> {
+    return new Promise(async (resolve, reject) => {
+      cloudinary.uploader.upload_stream({ folder }, (error, result) => {
         if (error) return reject(error);
         resolve(result);
-      });
+      }).end(file.buffer);
     });
   }
 
