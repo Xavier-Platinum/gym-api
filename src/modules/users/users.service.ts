@@ -285,8 +285,9 @@ export class UsersService {
         ],
         '-createdAt',
       );
+      console.log('USER>>>> ', user);
 
-      if (!user) {
+      if (!user || user instanceof Error) {
         throw new NotFoundException('User not found');
       }
 
@@ -295,8 +296,11 @@ export class UsersService {
         message: 'User found successfully',
         data: user,
       };
-    } catch (error) {
-      console.log(error);
+    } catch (error: any) {
+      if (error instanceof Error) {
+        throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
+      }
+
       if (error instanceof HttpException) {
         throw error;
       }
