@@ -3,23 +3,29 @@ import { CreateOrderDto, PaginateDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderRepository } from './entities/order.repository';
 import { Order } from './entities/order.schema';
-import { SubscriptionRepository } from '../subscriptions/entities/subscription.repository';
-import { FilterQuery } from 'mongoose';
+import {
+  AddonRepository,
+  SubscriptionRepository,
+} from '../subscriptions/entities/subscription.repository';
+import { FilterQuery, Schema } from 'mongoose';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class OrderService {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly subscription: SubscriptionRepository,
+    private readonly addons: AddonRepository,
   ) {}
-  async create(createOrderDto: CreateOrderDto): Promise<any> {
-    // Validate that all subscriptions exist
-    await this.validateSubscriptionsExist(createOrderDto.items);
 
-    const totalAmount = await this.calculateTotalAmount(createOrderDto.items);
+  @OnEvent('order.create')
+  async create(payload: CreateOrderDto): Promise<any> {
+    // Validate that all subscriptions exist
+    // await this.validateSubscriptionsExist(payload.items);
+
+    // const totalAmount = await this.calculateTotalAmount(payload.items);
     const newOrder = await this.orderRepository.create({
-      ...createOrderDto,
-      totalAmount,
+      ...payload,
     });
 
     return {
@@ -43,18 +49,34 @@ export class OrderService {
   }
 
   private async validateSubscriptionsExist(
-    items: Array<{ subscriptionId: string; quantity: number }>,
-  ) {
+    items: Array<{
+      subscriptionId: Schema.Types.ObjectId;
+      addons: Schema.Types.ObjectId[];
+      price: number;
+      durationInMonths: number;
+      isRecurring: boolean;
+    }>,
+  ): Promise<void> {
+    // Extract all subscription and addon IDs from the items
     const subscriptionIds = items.map((item) => item.subscriptionId);
+    const addonIds = items
+      .filter((item) => item.addons && item.addons.length > 0) // Filter items that have addons
+      .flatMap((item) => item.addons); // Flatten the addon arrays into a single array
 
-    // Fetch all subscriptions that match the given IDs
-    const subscriptions = await this.subscription.byQuery({
-      _id: { $in: subscriptionIds },
-    });
+    // Fetch all subscriptions and addons that match the given IDs
+    const [subscriptions, addons] = await Promise.all([
+      this.subscription.byQuery({ _id: { $in: subscriptionIds } }),
+      addonIds.length ? this.addons.byQuery({ _id: { $in: addonIds } }) : [], // Fetch addons only if addonIds exist
+    ]);
 
     // Check if any subscription IDs are missing
     if (subscriptions.length !== subscriptionIds.length) {
       throw new NotFoundException('One or more subscriptions do not exist');
+    }
+
+    // Check if any addon IDs are missing (only if addons were provided)
+    if (addonIds.length && addons.length !== addonIds.length) {
+      throw new NotFoundException('One or more addons do not exist');
     }
   }
 
@@ -96,8 +118,8 @@ export class OrderService {
           select: '-createdAt -updatedAt -password',
         },
         {
-          path: 'items.subscriptionId',
-          model: 'Subscription',
+          path: 'items',
+          model: 'UserPackage',
           select: '-createdAt -updatedAt',
         },
       ],
@@ -109,10 +131,11 @@ export class OrderService {
 
     return {
       statusCode: 200,
-      message: payload.conditions['$or'][0]['userId']
-        ? 'My Orders'
-        : 'Orders found successfully',
-      data: data.data,
+      // message: payload.conditions['$or'][0]['userId']
+      //   ? 'My Orders'
+      //   : 'Orders found successfully',
+      message: 'Orders found successfully',
+      data: data,
     };
   }
 
@@ -122,16 +145,34 @@ export class OrderService {
 
   // Calculate the total amount for the order based on subscriptions
   private async calculateTotalAmount(
-    items: Array<{ subscriptionId: string; quantity: number }>,
+    items: Array<{
+      subscriptionId: Schema.Types.ObjectId;
+      addons: Schema.Types.ObjectId[];
+      price: number;
+      durationInMonths: number;
+      isRecurring: boolean;
+    }>,
   ): Promise<number> {
     let totalAmount = 0;
+
     for (const item of items) {
-      // Fetch the subscription price (assuming a subscription service exists)
+      // Fetch the subscription price
       const subscription = await this.subscription.byQuery({
         _id: item.subscriptionId,
       });
-      totalAmount += subscription.price * item.quantity;
+
+      // Add the subscription price to the total amount
+      totalAmount += subscription.price;
+
+      if (item.addons && item.addons.length > 0) {
+        // Iterate through addons and fetch their prices
+        for (const addonId of item.addons) {
+          const addon = await this.addons.byQuery({ _id: addonId });
+          totalAmount += addon.price;
+        }
+      }
     }
+
     return totalAmount;
   }
 }

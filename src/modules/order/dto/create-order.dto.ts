@@ -1,15 +1,35 @@
-import { IsEnum, IsNotEmpty, IsArray, ValidateNested, IsMongoId, IsNumber, IsObject, IsOptional, IsString } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsArray,
+  ValidateNested,
+  IsMongoId,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  // IsBoolean,
+} from 'class-validator';
 import { Type } from 'class-transformer';
+import { Schema } from 'mongoose';
 
-class OrderItemDto {
-  @IsMongoId()
-  @IsNotEmpty()
-  subscriptionId: string;
+// class OrderItemDto {
+//   @IsMongoId()
+//   readonly subscriptionId: Schema.Types.ObjectId;
 
-  @IsNumber()
-  @IsNotEmpty()
-  quantity: number;
-}
+//   @IsArray()
+//   @IsMongoId({ each: true })
+//   readonly addons: Schema.Types.ObjectId[];
+
+//   @IsNumber()
+//   readonly price: number;
+
+//   @IsNumber()
+//   readonly durationInMonths: number;
+
+//   @IsBoolean()
+//   readonly isRecurring: boolean;
+// }
 
 export class CreateOrderDto {
   @IsMongoId()
@@ -18,8 +38,10 @@ export class CreateOrderDto {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => OrderItemDto)
-  items: OrderItemDto[];
+  @Type(() => Schema.Types.ObjectId)
+  items: Schema.Types.ObjectId[];
+
+  totalAmount: number;
 
   @IsEnum(['credit_card', 'paypal', 'bank_transfer'])
   @IsNotEmpty()

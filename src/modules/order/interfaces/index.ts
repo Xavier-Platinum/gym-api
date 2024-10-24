@@ -3,10 +3,7 @@ import { Schema } from 'mongoose';
 export interface IOrder {
   readonly _id?: Schema.Types.ObjectId | any;
   userId: Schema.Types.ObjectId;
-  items: Array<{
-    subscriptionId: string;
-    quantity: number;
-  }>;
+  items: Array<Schema.Types.ObjectId>;
   totalAmount: number;
   status: 'pending' | 'completed' | 'cancelled' | 'failed';
   paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';

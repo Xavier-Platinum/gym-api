@@ -2,7 +2,66 @@
 import { Schema, Prop, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes, Schema as MongooseSchema } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
-import { IActivityLog, ISubscription, IUser, IUserRole } from '../interfaces';
+import {
+  IActivityLog,
+  IRenewal,
+  IUser,
+  IUserPackage,
+  IUserRole,
+} from '../interfaces';
+
+@Schema({
+  timestamps: true,
+  toObject: { getters: true, virtuals: true, versionKey: false },
+  toJSON: { getters: true, virtuals: true, versionKey: false },
+})
+export class UserPackage extends Document implements IUserPackage {
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  user: MongooseSchema.Types.ObjectId;
+
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Subscription' })
+  subscription: MongooseSchema.Types.ObjectId;
+
+  @Prop({ type: Date })
+  startDate: Date;
+
+  @Prop({ type: Date })
+  endDate: Date;
+
+  @Prop({ type: Boolean, default: false })
+  isAutoRenew: boolean;
+
+  @Prop({
+    type: [
+      {
+        renewalDate: Date,
+        renewalAmount: Number,
+        renewalStatus: {
+          type: String,
+          enum: ['active', 'expired', 'cancelled', 'pending'],
+          default: 'pending',
+        },
+      },
+    ],
+  })
+  renewals: IRenewal[];
+
+  @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Addon' })
+  addons: MongooseSchema.Types.ObjectId[];
+
+  @Prop({
+    type: String,
+    enum: ['active', 'expired', 'cancelled', 'pending'],
+    default: 'pending',
+  })
+  status: string;
+
+  @Prop({ type: Date })
+  deletedAt: Date;
+}
+
+export type UserPackageDocument = UserPackage & Document;
+export const UserPackageSchema = SchemaFactory.createForClass(UserPackage);
 
 @Schema({
   timestamps: true,
@@ -62,36 +121,37 @@ export class User extends Document implements IUser {
   })
   roles: IUserRole[];
 
-  @Prop({
-    type: [
-      {
-        subscriptionId: {
-          type: MongooseSchema.Types.ObjectId,
-          ref: 'Subscription',
-        },
-        startDate: { type: Date, required: true },
-        endDate: { type: Date, required: true },
-        isAutoRenew: { type: Boolean, default: false },
-        renewals: [
-          {
-            renewalDate: { type: Date, required: true },
-            renewalAmount: { type: Number, required: true },
-            renewalStatus: {
-              type: String,
-              enum: ['success', 'failed'],
-              required: true,
-            },
-          },
-        ],
-        status: {
-          type: String,
-          enum: ['active', 'expired', 'cancelled', 'pending'],
-          required: true,
-        },
-      },
-    ],
-  })
-  subscriptions: ISubscription[];
+  // @Prop({
+  //   type: [
+  //     {
+  //       subscriptionId: {
+  //         type: MongooseSchema.Types.ObjectId,
+  //         ref: 'Subscription',
+  //       },
+  //       startDate: { type: Date, required: true },
+  //       endDate: { type: Date, required: true },
+  //       isAutoRenew: { type: Boolean, default: false },
+  //       renewals: [
+  //         {
+  //           renewalDate: { type: Date, required: true },
+  //           renewalAmount: { type: Number, required: true },
+  //           renewalStatus: {
+  //             type: String,
+  //             enum: ['success', 'failed'],
+  //             required: true,
+  //           },
+  //         },
+  //       ],
+  //       status: {
+  //         type: String,
+  //         enum: ['active', 'expired', 'cancelled', 'pending'],
+  //         // required: true,
+  //         default: 'pending',
+  //       },
+  //     },
+  //   ],
+  // })
+  // subscriptions: ISubscription[];
 
   @Prop({
     type: [

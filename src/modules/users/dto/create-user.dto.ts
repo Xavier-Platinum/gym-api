@@ -1,12 +1,20 @@
+import { Type } from 'class-transformer';
 import {
+  IsArray,
+  IsBoolean,
+  IsDate,
   IsEmail,
   IsEnum,
   IsMongoId,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Length,
+  ValidateNested,
 } from 'class-validator';
-import { ObjectId } from 'mongoose';
+import { ObjectId, Schema } from 'mongoose';
 
 export enum UserStatusEnum {
   SUSPEND = 'suspend',
@@ -58,6 +66,62 @@ export class UpdateStatusDto {
 
   @IsEnum(UserStatusEnum)
   status: UserStatusEnum;
+}
+
+export class SubscribeItemDto {
+  @IsMongoId()
+  readonly subscription: Schema.Types.ObjectId;
+
+  @IsArray()
+  @IsMongoId({ each: true })
+  readonly addons: Schema.Types.ObjectId[];
+
+  @IsDate()
+  @Type(() => Date)
+  readonly endDate: Date;
+
+  @IsDate()
+  @Type(() => Date)
+  readonly startDate: Date;
+
+  @IsBoolean()
+  @Type(() => Boolean)
+  readonly isAutoRenew: boolean;
+}
+
+export class CreateSubscribeDto {
+  // @IsMongoId()
+  // // @IsNotEmpty()
+  // user?: any;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => SubscribeItemDto)
+  items: SubscribeItemDto[];
+
+  totalAmount?: number;
+
+  @IsEnum(['credit_card', 'paypal', 'bank_transfer'])
+  @IsNotEmpty()
+  paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
+}
+
+export class PaginateDto {
+  @IsOptional()
+  @IsNumber()
+  page?: number;
+
+  @IsOptional()
+  @IsNumber()
+  limit?: number;
+
+  @IsOptional()
+  @IsString()
+  sort?: string;
+
+  @IsOptional()
+  @IsObject()
+  conditions?: object | any;
 }
 
 export class PaginateUserDto {

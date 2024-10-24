@@ -1,18 +1,24 @@
 import { Schema } from 'mongoose';
 
-export interface ISubscription {
-  subscriptionId: Schema.Types.ObjectId;
+export interface IUserPackage {
+  readonly _id?: Schema.Types.ObjectId | any;
+  user: Schema.Types.ObjectId;
+  subscription: Schema.Types.ObjectId;
   startDate: Date;
   endDate: Date;
   isAutoRenew: boolean;
   renewals: IRenewal[];
-  status: 'active' | 'expired' | 'cancelled' | 'pending';
+  addons: Schema.Types.ObjectId[];
+  status: string;
+  deletedAt: Date;
+  readonly createdAt?: Schema.Types.Date;
+  readonly updatedAt?: Schema.Types.Date;
 }
 
 export interface IRenewal {
   renewalDate: Date;
   renewalAmount: number;
-  renewalStatus: 'success' | 'failed';
+  renewalStatus: string;
 }
 
 export interface IActivityLog {
@@ -34,7 +40,7 @@ export interface IUser {
   status?: string;
   statusReason?: string;
   roles: IUserRole[];
-  subscriptions: ISubscription[];
+  subscriptions?: IUserPackage[];
   activityLogs: IActivityLog[];
   aboutMe: Map<string, string>;
   isDeleted: boolean;

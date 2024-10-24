@@ -14,17 +14,12 @@ export class Order extends Document implements IOrder {
   userId: MongooseSchema.Types.ObjectId;
 
   @Prop({
-    type: [
-      {
-        subscriptionId: {
-          type: MongooseSchema.Types.ObjectId,
-          ref: 'Subscription',
-        },
-        quantity: { type: Number, default: 1 },
-      },
-    ],
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'UserPackage',
+    // default: null,
+    required: true,
   })
-  items: { subscriptionId: string; quantity: number }[];
+  items: MongooseSchema.Types.ObjectId[];
 
   @Prop({ type: Number, default: 0 })
   totalAmount: number;
