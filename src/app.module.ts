@@ -15,6 +15,7 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { HttpModule } from '@nestjs/axios';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { RecommendationsModule } from './modules/recommendations/recommendations.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     OrderModule,
     PaymentsModule,
     AnalyticsModule,
+    RecommendationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
