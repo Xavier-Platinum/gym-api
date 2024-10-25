@@ -46,6 +46,10 @@ export class CreateOrderDto {
   @IsEnum(['credit_card', 'paypal', 'bank_transfer'])
   @IsNotEmpty()
   paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
+
+  @IsEnum(['Stripe', 'Paystack', 'Flutterwave'])
+  // @IsNotEmpty()
+  paymentGateway?: 'Stripe' | 'Paystack' | 'Flutterwave';
 }
 
 export class PaginateDto {

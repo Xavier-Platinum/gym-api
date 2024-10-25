@@ -51,7 +51,16 @@ export class UserPackage extends Document implements IUserPackage {
 
   @Prop({
     type: String,
-    enum: ['active', 'expired', 'cancelled', 'pending'],
+    enum: [
+      'abandoned',
+      'failed',
+      'ongoing',
+      'pending',
+      'processing',
+      'queued',
+      'reversed',
+      'success',
+    ],
     default: 'pending',
   })
   status: string;

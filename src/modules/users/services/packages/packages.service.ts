@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -15,7 +16,7 @@ import {
   SubscribeItemDto,
 } from '../../dto/create-user.dto';
 import { UserPackageRepository } from '../../entities/user.repository';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class PackagesService {
@@ -26,33 +27,72 @@ export class PackagesService {
     private eventEmitter: EventEmitter2,
   ) {}
 
+  @OnEvent('order.verified')
+  async updatePackageStatus(payload: any): Promise<void> {
+    await this.userPackageRepository.findAndUpdate(
+      { _id: payload.package },
+      {
+        $set: { status: payload?.status },
+      },
+    );
+  }
+
   async create(
     payload: CreateSubscribeDto,
     user: Schema.Types.ObjectId,
   ): Promise<any> {
-    // Validate that all subscriptions exist
-    await this.validateSubscriptionsExist(payload.items);
+    try {
+      if (payload.paymentGateway !== 'Paystack') {
+        throw new HttpException(
+          'Only Paystack payment gateway is supported',
+          400,
+        );
+      }
 
-    const totalAmount = await this.calculateTotalAmount(payload.items);
+      if (payload?.items.length > 1) {
+        throw new HttpException(
+          'Only one subscription per package allowed',
+          400,
+        );
+      }
 
-    const ids = await this.saveUserPackages(payload.items, user);
+      const isSubscribed = await this.userPackageRepository.exists({
+        user: user,
+      });
 
-    const orderData = {
-      userId: user,
-      items: ids,
-      totalAmount: totalAmount,
-      paymentMethod: payload.paymentMethod,
-    };
+      console.log(isSubscribed);
 
-    const order = await this.eventEmitter.emitAsync('order.create', orderData);
+      if (isSubscribed) {
+        throw new HttpException('User already has a subscription', 400);
+      }
 
-    console.log(order);
+      // Validate that all subscriptions exist
+      await this.validateSubscriptionsExist(payload.items);
 
-    return {
-      statusCode: 201,
-      message: 'Subscription initiated successfully',
-      data: {},
-    };
+      const totalAmount = await this.calculateTotalAmount(payload.items);
+
+      const ids = await this.saveUserPackages(payload.items, user);
+
+      const orderData = {
+        userId: user,
+        items: ids,
+        totalAmount: totalAmount || payload?.totalAmount,
+        paymentMethod: payload.paymentMethod,
+        paymentGateway: payload?.paymentGateway,
+      };
+
+      const order: any = await this.eventEmitter.emitAsync(
+        'order.create',
+        orderData,
+      );
+
+      return order[0];
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw new HttpException(error?.message, error?.getStatus());
+      }
+      throw new InternalServerErrorException(error);
+    }
   }
 
   private async validateSubscriptionsExist(

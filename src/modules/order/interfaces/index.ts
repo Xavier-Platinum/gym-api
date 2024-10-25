@@ -5,7 +5,7 @@ export interface IOrder {
   userId: Schema.Types.ObjectId;
   items: Array<Schema.Types.ObjectId>;
   totalAmount: number;
-  status: 'pending' | 'completed' | 'cancelled' | 'failed';
+  status: string;
   paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
   readonly createdAt?: Date;
   readonly updatedAt?: Date;

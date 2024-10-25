@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateOrderDto, PaginateDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderRepository } from './entities/order.repository';
@@ -8,7 +14,7 @@ import {
   SubscriptionRepository,
 } from '../subscriptions/entities/subscription.repository';
 import { FilterQuery, Schema } from 'mongoose';
-import { OnEvent } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class OrderService {
@@ -16,23 +22,56 @@ export class OrderService {
     private readonly orderRepository: OrderRepository,
     private readonly subscription: SubscriptionRepository,
     private readonly addons: AddonRepository,
+    private eventEmitter: EventEmitter2,
   ) {}
+
+  @OnEvent('transaction.verified')
+  async verifyTransaction(payload: any): Promise<void> {
+    // TODO: verify transaction using payment gateway
+    console.log('Transaction verified', payload);
+    const data = await this.orderRepository.findAndUpdate(
+      { _id: payload.orderId },
+      {
+        $set: { status: payload?.status },
+      },
+    );
+
+    this.eventEmitter.emit('order.verified', {
+      package: data.items[0],
+      status: data.status,
+    });
+  }
 
   @OnEvent('order.create')
   async create(payload: CreateOrderDto): Promise<any> {
-    // Validate that all subscriptions exist
-    // await this.validateSubscriptionsExist(payload.items);
+    try {
+      // Validate that all subscriptions exist
+      // await this.validateSubscriptionsExist(payload.items);
 
-    // const totalAmount = await this.calculateTotalAmount(payload.items);
-    const newOrder = await this.orderRepository.create({
-      ...payload,
-    });
+      // const totalAmount = await this.calculateTotalAmount(payload.items);
+      const newOrder = await this.orderRepository.create({
+        ...payload,
+      });
 
-    return {
-      statusCode: 201,
-      message: 'Order created successfully',
-      data: newOrder,
-    };
+      const transaction: any = await this.eventEmitter.emitAsync(
+        'transaction.create',
+        {
+          userId: payload.userId,
+          orderId: newOrder.id,
+          amount: payload.totalAmount,
+          paymentMethod: payload.paymentMethod,
+          paymentGateway: payload.paymentGateway,
+        },
+      );
+
+      return transaction[0];
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message,
+        error,
+      };
+    }
   }
 
   async getAnalytics(query: object, pagination: object): Promise<any> {

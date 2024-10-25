@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   HttpException,
   HttpStatus,
@@ -15,6 +16,7 @@ import { FilterQuery } from 'mongoose';
 import { PaymentGatewayFactory } from '../payments/gateway.factory';
 import { UserRepository } from '../users/entities/user.repository';
 import { OrderRepository } from '../order/entities/order.repository';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class TransactionsService {
@@ -23,7 +25,22 @@ export class TransactionsService {
     private readonly paymentGatewayFactory: PaymentGatewayFactory,
     private readonly userRepository: UserRepository,
     private readonly order: OrderRepository,
+    private eventEmitter: EventEmitter2,
   ) {}
+
+  @OnEvent('transaction.create')
+  async OrderTransaction(payload: CreateTransactionDto) {
+    try {
+      return await this.create(payload);
+    } catch (error) {
+      return {
+        success: false,
+        message: error?.message,
+      };
+      throw new Error(error);
+    }
+  }
+
   async create(payload: CreateTransactionDto) {
     try {
       // TODO: check duplicate by OrderId
@@ -49,8 +66,6 @@ export class TransactionsService {
         transactionRef,
       );
 
-      console.log('HERE>>>> ', paymentResponse);
-
       await this.transactionRepository.create({
         ...payload,
         transactionRef,
@@ -60,15 +75,14 @@ export class TransactionsService {
 
       return {
         statusCode: HttpStatus.CREATED,
-        message: 'Transaction created successfully',
-        data: { ...paymentResponse.metadata },
+        message: 'Transaction initiated successfully',
+        data: { url: paymentResponse.metadata.data.authorization_url },
       };
     } catch (error) {
-      console.log('INIT ERROR>>> ', error.response);
       if (error instanceof HttpException) {
-        throw error;
+        throw new HttpException(error?.message, error?.getStatus());
       }
-      throw new InternalServerErrorException();
+      throw new InternalServerErrorException(error);
     }
   }
 
@@ -245,10 +259,11 @@ export class TransactionsService {
     }
 
     const paymentGateway = this.paymentGatewayFactory.getGateway(gateway);
-    const verificationResponse =
-      await paymentGateway.verifyPayment(transaction_id);
+    const verificationResponse = await paymentGateway.verifyPayment(
+      transaction_id || transactionRef,
+    );
 
-    await this.transactionRepository.update(
+    const data = await this.transactionRepository.update(
       { transactionRef: transactionRef },
       {
         status: verificationResponse.status,
@@ -256,6 +271,11 @@ export class TransactionsService {
         paymentMetadata: verificationResponse.metadata,
       },
     );
+
+    this.eventEmitter.emit('transaction.verified', {
+      orderId: data?.orderId,
+      status: verificationResponse.status,
+    });
 
     return {
       statusCode: HttpStatus.OK,

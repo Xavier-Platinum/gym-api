@@ -25,10 +25,19 @@ export class Order extends Document implements IOrder {
   totalAmount: number;
 
   @Prop({
-    enum: ['pending', 'completed', 'failed', 'cancelled'],
+    enum: [
+      'abandoned',
+      'failed',
+      'ongoing',
+      'pending',
+      'processing',
+      'queued',
+      'reversed',
+      'success',
+    ],
     default: 'pending',
   })
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  status: string;
 
   @Prop({
     enum: ['credit_card', 'paypal', 'bank_transfer'],
