@@ -29,6 +29,7 @@ export class PackagesService {
 
   @OnEvent('order.verified')
   async updatePackageStatus(payload: any): Promise<void> {
+    console.log(payload);
     await this.userPackageRepository.findAndUpdate(
       { _id: payload.package },
       {
@@ -51,13 +52,6 @@ export class PackagesService {
       //   );
       // }
 
-      if (payload?.items.length > 1) {
-        throw new HttpException(
-          'Only one subscription per package allowed',
-          400,
-        );
-      }
-
       const isSubscribed = await this.userPackageRepository.exists({
         user: user,
       });
@@ -69,15 +63,15 @@ export class PackagesService {
       }
 
       // Validate that all subscriptions exist
-      await this.validateSubscriptionsExist(payload.items);
+      await this.validateSubscriptionsExist(payload.item);
 
-      const totalAmount = await this.calculateTotalAmount(payload.items);
+      const totalAmount = await this.calculateTotalAmount(payload.item);
 
-      const ids = await this.saveUserPackages(payload.items, user);
+      const ids = await this.saveUserPackages(payload.item, user);
 
       const orderData = {
         userId: user,
-        items: ids,
+        items: [ids],
         totalAmount: totalAmount || payload?.totalAmount,
         paymentMethod: payload.paymentMethod,
         paymentGateway: payload?.paymentGateway,
@@ -97,59 +91,52 @@ export class PackagesService {
     }
   }
 
-  private async validateSubscriptionsExist(
-    items: Array<{
-      subscription: Schema.Types.ObjectId;
-      addons: Schema.Types.ObjectId[];
-      price?: number;
-      duration: number;
-      isAutoRenew: boolean;
-    }>,
-  ): Promise<void> {
-    const subscriptionIds = items.map((item) => item.subscription);
-    const addonIds = items
-      .filter((item) => item.addons && item.addons.length > 0)
-      .flatMap((item) => item.addons);
-
+  private async validateSubscriptionsExist(items: {
+    subscription: Schema.Types.ObjectId[];
+    addons: Schema.Types.ObjectId[];
+    price?: number;
+    duration: number;
+    isAutoRenew: boolean;
+  }): Promise<void> {
     const [subscriptions, addons] = await Promise.all([
       this.subscriptionRepository.all({
-        conditions: { _id: { $in: subscriptionIds } },
+        conditions: { _id: { $in: items.subscription } },
       }),
-      addonIds.length
-        ? this.addonsRepository.all({ conditions: { _id: { $in: addonIds } } })
+      items.addons.length
+        ? this.addonsRepository.all({
+            conditions: { _id: { $in: items.addons } },
+          })
         : [], // Fetch addons only if addonIds exist
     ]);
 
-    if (subscriptions.length !== subscriptionIds.length) {
+    if (subscriptions.length !== items.subscription.length) {
       throw new NotFoundException('One or more subscriptions do not exist');
     }
 
-    if (addonIds.length && addons.length !== addonIds.length) {
+    if (items.addons.length && addons.length !== items.addons.length) {
       throw new NotFoundException('One or more addons do not exist');
     }
   }
 
-  private async calculateTotalAmount(
-    items: Array<{
-      subscription: Schema.Types.ObjectId;
-      addons: Schema.Types.ObjectId[];
-      price?: number;
-      duration: number;
-      // startDate: Date;
-      isAutoRenew: boolean;
-    }>,
-  ): Promise<number> {
+  private async calculateTotalAmount(items: {
+    subscription: Schema.Types.ObjectId[];
+    addons: Schema.Types.ObjectId[];
+    price?: number;
+    duration: number;
+    // startDate: Date;
+    isAutoRenew: boolean;
+  }): Promise<number> {
     let totalAmount = 0;
 
-    for (const item of items) {
+    for (const item of items.subscription) {
       const subscription = await this.subscriptionRepository.byQuery({
-        _id: item.subscription,
+        _id: item,
       });
 
       totalAmount += subscription.price;
 
-      if (item.addons && item.addons.length > 0) {
-        for (const addonId of item.addons) {
+      if (items.addons && items.addons.length > 0) {
+        for (const addonId of items.addons) {
           const addon = await this.addonsRepository.byQuery({ _id: addonId });
           totalAmount += addon.price;
         }
@@ -160,29 +147,24 @@ export class PackagesService {
   }
 
   private async saveUserPackages(
-    items: Array<{
-      subscription: Schema.Types.ObjectId;
+    items: {
+      subscription: Schema.Types.ObjectId[];
       addons: Schema.Types.ObjectId[];
       price?: number;
       duration: number;
       // startDate: Date;
       isAutoRenew: boolean;
-    }>,
+    },
     user: Schema.Types.ObjectId,
-  ): Promise<string[]> {
+  ): Promise<string> {
     // for (const item of items) {
     //     console.log(item);
     // }
-    const packageIds = await Promise.all(
-      items.map(async (item) => {
-        const userPackage = await this.userPackageRepository.create({
-          ...item,
-          user,
-        });
-        return userPackage._id;
-      }),
-    );
-    return packageIds;
+    const userPackage = await this.userPackageRepository.create({
+      ...items,
+      user,
+    });
+    return userPackage._id;
   }
 
   async getUserSubscriptions(user: Schema.Types.ObjectId) {

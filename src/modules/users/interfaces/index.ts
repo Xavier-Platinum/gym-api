@@ -3,7 +3,7 @@ import { Schema } from 'mongoose';
 export interface IUserPackage {
   readonly _id?: Schema.Types.ObjectId | any;
   user: Schema.Types.ObjectId;
-  subscription: Schema.Types.ObjectId;
+  subscription: Schema.Types.ObjectId[];
   startDate: Date;
   endDate: Date;
   isAutoRenew: boolean;

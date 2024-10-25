@@ -250,12 +250,19 @@ export class TransactionsService {
     webhook: boolean,
     transaction_id: string,
   ) {
-    const isExist = await this.transactionRepository.exists({
+    const isExist = await this.transactionRepository.byQuery({
       transactionRef: transactionRef,
     });
 
     if (!isExist) {
       throw new NotFoundException('Transaction not found');
+    }
+
+    if (isExist?.status === 'success') {
+      throw new HttpException(
+        'Transaction has already been verified successful.',
+        409,
+      );
     }
 
     const paymentGateway = this.paymentGatewayFactory.getGateway(gateway);
@@ -269,12 +276,14 @@ export class TransactionsService {
         status: verificationResponse.status,
         webhookVerified: webhook,
         paymentMetadata: verificationResponse.metadata,
+        paymentMethod: verificationResponse.paymentMethod,
       },
     );
 
     this.eventEmitter.emit('transaction.verified', {
       orderId: data?.orderId,
       status: verificationResponse.status,
+      paymentMethod: verificationResponse.paymentMethod,
     });
 
     return {

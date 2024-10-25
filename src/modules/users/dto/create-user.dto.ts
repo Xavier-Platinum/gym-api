@@ -70,8 +70,9 @@ export class UpdateStatusDto {
 }
 
 export class SubscribeItemDto {
-  @IsMongoId()
-  readonly subscription: Schema.Types.ObjectId;
+  @IsArray()
+  @IsMongoId({ each: true })
+  readonly subscription: [Schema.Types.ObjectId];
 
   @IsArray()
   @IsMongoId({ each: true })
@@ -95,10 +96,10 @@ export class CreateSubscribeDto {
   // // @IsNotEmpty()
   // user?: any;
 
-  @IsArray()
+  @IsObject()
   @ValidateNested({ each: true })
   @Type(() => SubscribeItemDto)
-  items: SubscribeItemDto[];
+  item: SubscribeItemDto;
 
   totalAmount?: number;
 

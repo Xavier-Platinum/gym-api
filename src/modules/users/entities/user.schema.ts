@@ -22,8 +22,8 @@ export class UserPackage extends Document implements IUserPackage {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   user: MongooseSchema.Types.ObjectId;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Subscription' })
-  subscription: MongooseSchema.Types.ObjectId;
+  @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Subscription' })
+  subscription: MongooseSchema.Types.ObjectId[];
 
   @Prop({ type: Date })
   startDate: Date;

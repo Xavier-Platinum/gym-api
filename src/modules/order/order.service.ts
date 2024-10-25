@@ -32,9 +32,13 @@ export class OrderService {
     const data = await this.orderRepository.findAndUpdate(
       { _id: payload.orderId },
       {
-        $set: { status: payload?.status },
+        $set: {
+          status: payload?.status,
+          paymentMethod: payload?.paymentMethod,
+        },
       },
     );
+    console.log(data);
 
     this.eventEmitter.emit('order.verified', {
       package: data.items[0],
