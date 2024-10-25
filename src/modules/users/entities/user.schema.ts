@@ -16,6 +16,9 @@ import {
   toJSON: { getters: true, virtuals: true, versionKey: false },
 })
 export class UserPackage extends Document implements IUserPackage {
+  @Prop({ type: Number })
+  duration: number;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
   user: MongooseSchema.Types.ObjectId;
 
