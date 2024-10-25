@@ -45,10 +45,20 @@ export class Transaction extends Document implements ITransaction {
   transaction_id: string;
 
   @Prop({
-    enum: ['completed', 'pending', 'failed', 'refunded'],
+    type: String,
+    enum: [
+      'abandoned',
+      'failed',
+      'ongoing',
+      'pending',
+      'processing',
+      'queued',
+      'reversed',
+      'success',
+    ],
     default: 'pending',
   })
-  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  status: string;
 
   @Prop({ type: Number, default: 0 })
   retryAttempts: number;

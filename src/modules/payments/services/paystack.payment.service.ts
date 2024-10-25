@@ -21,6 +21,7 @@ export class PaystackService implements PaymentGateway {
       reference: transactionRef,
       amount: amount * 100,
       email: user?.email,
+      redirect_url: `http://localhost:8080/transactions/verify?transactionRef=${transactionRef}&gateway=Paystack`,
     };
 
     const response = await lastValueFrom(
@@ -31,11 +32,13 @@ export class PaystackService implements PaymentGateway {
       }),
     );
 
+    console.log(response.data);
+
     return {
       gateway: 'Paystack',
       transactionRef,
       status: 'pending',
-      metadata: {},
+      metadata: { ...response.data },
     };
   }
 
@@ -49,9 +52,14 @@ export class PaystackService implements PaymentGateway {
       }),
     );
 
+    // console.log(response.data);
+
     return {
       transactionRef,
-      status: 'completed',
+      status:
+        response.data.data.status === 'abandoned'
+          ? 'failed'
+          : response.data.data.status,
       metadata: {},
     };
   }

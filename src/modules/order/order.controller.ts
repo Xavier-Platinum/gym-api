@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
   Req,
+  NotImplementedException,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -24,9 +25,13 @@ export class OrderController {
 
   @Post()
   @Roles(ROLES.SuperAdmin, ROLES.User)
-  async create(@Body() payload: CreateOrderDto, @Req() req: { user: any }) {
+  async create(
+    @Body() payload: any | CreateOrderDto,
+    @Req() req: { user: any },
+  ) {
     payload.userId = req.user._id;
-    return await this.orderService.create(payload);
+    throw new NotImplementedException();
+    // return await this.orderService.create(payload);
   }
 
   @Get()

@@ -14,26 +14,30 @@ export class Order extends Document implements IOrder {
   userId: MongooseSchema.Types.ObjectId;
 
   @Prop({
-    type: [
-      {
-        subscriptionId: {
-          type: MongooseSchema.Types.ObjectId,
-          ref: 'Subscription',
-        },
-        quantity: { type: Number, default: 1 },
-      },
-    ],
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'UserPackage',
+    // default: null,
+    required: true,
   })
-  items: { subscriptionId: string; quantity: number }[];
+  items: MongooseSchema.Types.ObjectId[];
 
   @Prop({ type: Number, default: 0 })
   totalAmount: number;
 
   @Prop({
-    enum: ['pending', 'completed', 'failed', 'cancelled'],
+    enum: [
+      'abandoned',
+      'failed',
+      'ongoing',
+      'pending',
+      'processing',
+      'queued',
+      'reversed',
+      'success',
+    ],
     default: 'pending',
   })
-  status: 'pending' | 'completed' | 'failed' | 'cancelled';
+  status: string;
 
   @Prop({
     enum: ['credit_card', 'paypal', 'bank_transfer'],

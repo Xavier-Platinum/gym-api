@@ -9,7 +9,7 @@ export interface ITransaction {
   transactionRef: string;
   paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
   paymentGateway: 'Stripe' | 'Paystack' | 'Flutterwave';
-  status: 'completed' | 'pending' | 'failed' | 'refunded';
+  status: string;
   retryAttempts: number;
   isRefunded: boolean;
   paymentMetadata: any;

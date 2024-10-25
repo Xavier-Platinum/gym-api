@@ -35,6 +35,11 @@ import { AddonsService } from './services/addons/addons.service';
     AddonsService,
     AddonRepository,
   ],
-  exports: [SubscriptionsService, SubscriptionRepository, CloudinaryService],
+  exports: [
+    SubscriptionsService,
+    SubscriptionRepository,
+    CloudinaryService,
+    AddonRepository,
+  ],
 })
 export class SubscriptionsModule {}

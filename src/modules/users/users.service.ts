@@ -170,11 +170,11 @@ export class UsersService {
             model: 'Role',
             // select: '-createdAt -updatedAt',
           },
-          {
-            path: 'subscriptions.subscriptionId',
-            model: 'Subscription',
-            // select: '-createdAt -updatedAt',
-          },
+          // {
+          //   path: 'subscriptions.subscriptionId',
+          //   model: 'Subscription',
+          //   // select: '-createdAt -updatedAt',
+          // },
         ],
       });
 
@@ -208,11 +208,11 @@ export class UsersService {
             model: 'Role',
             // select: '-createdAt -updatedAt',
           },
-          {
-            path: 'subscriptions.subscriptionId',
-            model: 'Subscription',
-            // select: '-createdAt -updatedAt',
-          },
+          // {
+          //   path: 'subscriptions.subscriptionId',
+          //   model: 'Subscription',
+          //   // select: '-createdAt -updatedAt',
+          // },
         ],
         '-createdAt',
       );
@@ -242,11 +242,11 @@ export class UsersService {
             model: 'Role',
             // select: '-createdAt -updatedAt',
           },
-          {
-            path: 'subscriptions.subscriptionId',
-            model: 'Subscription',
-            // select: '-createdAt -updatedAt',
-          },
+          // {
+          //   path: 'subscriptions.subscriptionId',
+          //   model: 'Subscription',
+          //   // select: '-createdAt -updatedAt',
+          // },
         ],
         '-createdAt',
       );
@@ -277,11 +277,11 @@ export class UsersService {
             model: 'Role',
             // select: '-createdAt -updatedAt',
           },
-          {
-            path: 'subscriptions.subscriptionId',
-            model: 'Subscription',
-            // select: '-createdAt -updatedAt',
-          },
+          // {
+          //   path: 'subscriptions.subscriptionId',
+          //   model: 'Subscription',
+          //   // select: '-createdAt -updatedAt',
+          // },
         ],
         '-createdAt',
       );
@@ -384,11 +384,11 @@ export class UsersService {
             model: 'Role',
             // select: '-createdAt -updatedAt',
           },
-          {
-            path: 'subscriptions.subscriptionId',
-            model: 'Subscription',
-            // select: '-createdAt -updatedAt',
-          },
+          // {
+          //   path: 'subscriptions.subscriptionId',
+          //   model: 'Subscription',
+          //   // select: '-createdAt -updatedAt',
+          // },
         ],
       );
       if (!user || !(await user.comparePassword(password))) {
