@@ -102,11 +102,11 @@ export class CreateSubscribeDto {
 
   totalAmount?: number;
 
-  @IsEnum(['credit_card', 'paypal', 'bank_transfer'])
+  // @IsEnum(['credit_card', 'paypal', 'bank_transfer'])
   // @IsNotEmpty()
   paymentMethod?: 'credit_card' | 'paypal' | 'bank_transfer';
 
-  @IsEnum(['Stripe', 'Paystack', 'Flutterwave'])
+  // @IsEnum(['Stripe', 'Paystack', 'Flutterwave'])
   // @IsNotEmpty()
   paymentGateway?: 'Stripe' | 'Paystack' | 'Flutterwave';
 }
