@@ -6,7 +6,7 @@ export interface IOrder {
   items: Array<Schema.Types.ObjectId>;
   totalAmount: number;
   status: string;
-  paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
+  paymentMethod: string;
   readonly createdAt?: Date;
   readonly updatedAt?: Date;
 }

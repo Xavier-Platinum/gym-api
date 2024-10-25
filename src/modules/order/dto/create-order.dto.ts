@@ -43,9 +43,9 @@ export class CreateOrderDto {
 
   totalAmount: number;
 
-  @IsEnum(['credit_card', 'paypal', 'bank_transfer'])
+  @IsString()
   @IsNotEmpty()
-  paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
+  paymentMethod: string;
 
   @IsEnum(['Stripe', 'Paystack', 'Flutterwave'])
   // @IsNotEmpty()

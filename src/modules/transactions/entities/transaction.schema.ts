@@ -27,10 +27,10 @@ export class Transaction extends Document implements ITransaction {
   transactionDate: Date;
 
   @Prop({
-    enum: ['credit_card', 'paypal', 'bank_transfer'],
-    default: 'credit_card',
+    type: String,
+    default: '',
   })
-  paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
+  paymentMethod: string;
 
   @Prop({
     enum: ['Stripe', 'Paystack', 'Flutterwave'],

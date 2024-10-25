@@ -14,7 +14,7 @@ export class Order extends Document implements IOrder {
   userId: MongooseSchema.Types.ObjectId;
 
   @Prop({
-    type: MongooseSchema.Types.ObjectId,
+    type: [MongooseSchema.Types.ObjectId],
     ref: 'UserPackage',
     // default: null,
     required: true,
@@ -40,10 +40,10 @@ export class Order extends Document implements IOrder {
   status: string;
 
   @Prop({
-    enum: ['credit_card', 'paypal', 'bank_transfer'],
-    default: 'credit_card',
+    type: String,
+    default: '',
   })
-  paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
+  paymentMethod: string;
 }
 
 export type OrderDocument = Order & Document;

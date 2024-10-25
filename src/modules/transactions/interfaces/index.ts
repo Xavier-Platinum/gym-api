@@ -7,7 +7,7 @@ export interface ITransaction {
   amount: number;
   transactionDate: Date;
   transactionRef: string;
-  paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
+  paymentMethod: string;
   paymentGateway: 'Stripe' | 'Paystack' | 'Flutterwave';
   status: string;
   retryAttempts: number;

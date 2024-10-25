@@ -52,7 +52,7 @@ export class PaystackService implements PaymentGateway {
       }),
     );
 
-    // console.log(response.data);
+    console.log(response.data);
 
     return {
       transactionRef,
@@ -61,6 +61,7 @@ export class PaystackService implements PaymentGateway {
           ? 'failed'
           : response.data.data.status,
       metadata: {},
+      paymentMethod: response?.data.data.channel,
     };
   }
 }
