@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Type } from 'class-transformer';
 import {
   IsArray,
@@ -76,13 +77,13 @@ export class SubscribeItemDto {
   @IsMongoId({ each: true })
   readonly addons: Schema.Types.ObjectId[];
 
-  @IsDate()
-  @Type(() => Date)
-  readonly endDate: Date;
+  // @IsDate()
+  // @Type(() => Date)
+  // readonly endDate: Date;
 
-  @IsDate()
-  @Type(() => Date)
-  readonly startDate: Date;
+  @IsNumber()
+  @Type(() => Number)
+  readonly duration: number;
 
   @IsBoolean()
   @Type(() => Boolean)
@@ -102,12 +103,12 @@ export class CreateSubscribeDto {
   totalAmount?: number;
 
   @IsEnum(['credit_card', 'paypal', 'bank_transfer'])
-  @IsNotEmpty()
-  paymentMethod: 'credit_card' | 'paypal' | 'bank_transfer';
+  // @IsNotEmpty()
+  paymentMethod?: 'credit_card' | 'paypal' | 'bank_transfer';
 
   @IsEnum(['Stripe', 'Paystack', 'Flutterwave'])
-  @IsNotEmpty()
-  paymentGateway: 'Stripe' | 'Paystack' | 'Flutterwave';
+  // @IsNotEmpty()
+  paymentGateway?: 'Stripe' | 'Paystack' | 'Flutterwave';
 }
 
 export class PaginateDto {

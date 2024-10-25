@@ -42,12 +42,14 @@ export class PackagesService {
     user: Schema.Types.ObjectId,
   ): Promise<any> {
     try {
-      if (payload.paymentGateway !== 'Paystack') {
-        throw new HttpException(
-          'Only Paystack payment gateway is supported',
-          400,
-        );
-      }
+      payload.paymentGateway = 'Paystack';
+      payload.paymentMethod = 'bank_transfer';
+      // if (payload.paymentGateway !== 'Paystack') {
+      //   throw new HttpException(
+      //     'Only Paystack payment gateway is supported',
+      //     400,
+      //   );
+      // }
 
       if (payload?.items.length > 1) {
         throw new HttpException(
@@ -100,8 +102,7 @@ export class PackagesService {
       subscription: Schema.Types.ObjectId;
       addons: Schema.Types.ObjectId[];
       price?: number;
-      endDate: Date;
-      startDate: Date;
+      duration: number;
       isAutoRenew: boolean;
     }>,
   ): Promise<void> {
@@ -133,8 +134,8 @@ export class PackagesService {
       subscription: Schema.Types.ObjectId;
       addons: Schema.Types.ObjectId[];
       price?: number;
-      endDate: Date;
-      startDate: Date;
+      duration: number;
+      // startDate: Date;
       isAutoRenew: boolean;
     }>,
   ): Promise<number> {
@@ -163,8 +164,8 @@ export class PackagesService {
       subscription: Schema.Types.ObjectId;
       addons: Schema.Types.ObjectId[];
       price?: number;
-      endDate: Date;
-      startDate: Date;
+      duration: number;
+      // startDate: Date;
       isAutoRenew: boolean;
     }>,
     user: Schema.Types.ObjectId,

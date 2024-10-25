@@ -10,6 +10,7 @@ export interface IUserPackage {
   renewals: IRenewal[];
   addons: Schema.Types.ObjectId[];
   status: string;
+  duration: number;
   deletedAt: Date;
   readonly createdAt?: Schema.Types.Date;
   readonly updatedAt?: Schema.Types.Date;
