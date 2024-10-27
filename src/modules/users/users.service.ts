@@ -342,26 +342,87 @@ export class UsersService {
     phoneNumber: string;
   }): Promise<any> {
     try {
+      console.log(payload);
       const isUserExists = await this.userRepository.exists({
-        role: 'superadmin',
+        role: 'SuperAdmin',
       });
 
       if (isUserExists) {
         throw new HttpException('Superadmin already exists', 409);
       }
 
+      const role = await this.rolesRepository.byQuery({ name: 'SuperAdmin' });
+
       const superAdmin = {
         email: payload.email,
         password: payload.password,
         fullName: payload.fullName,
-        role: 'SuperAdmin',
+        roles: [
+          {
+            roleId: role.id,
+            customPermissions: [],
+          },
+        ],
         phoneNumber: payload.phoneNumber,
+        confirmed: true,
+        status: 'active',
       };
 
       const data = await this.userRepository.create(superAdmin);
       return {
         statusCode: 201,
         message: 'Superadmin created successfully',
+        data,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new HttpException(error?.message, error?.statusCode);
+    }
+  }
+
+  async createSystemAdmin(payload: {
+    email: string;
+    password: string;
+    fullName: string;
+    phoneNumber: string;
+    state: string;
+    address: string;
+  }): Promise<any> {
+    try {
+      // console.log(payload);
+      const isUserExists = await this.userRepository.exists({
+        $and: [{ role: 'Admin' }, { email: payload.email }],
+      });
+
+      if (isUserExists) {
+        throw new HttpException('Admin already exists', 409);
+      }
+
+      const role = await this.rolesRepository.byQuery({ name: 'Admin' });
+
+      const superAdmin = {
+        email: payload.email,
+        password: payload.password,
+        fullName: payload.fullName,
+        roles: [
+          {
+            roleId: role.id,
+            customPermissions: [],
+          },
+        ],
+        phoneNumber: payload.phoneNumber,
+        confirmed: true,
+        status: 'active',
+        state: payload.state,
+        address: payload.address,
+      };
+
+      const data = await this.userRepository.create(superAdmin);
+      return {
+        statusCode: 201,
+        message: 'Admin created successfully',
         data,
       };
     } catch (error) {

@@ -13,4 +13,5 @@ export interface IRole {
 export enum ROLES {
   SuperAdmin = 'SuperAdmin',
   User = 'User',
+  Admin = 'Admin',
 }

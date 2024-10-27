@@ -31,6 +31,9 @@ export class UserPackage extends Document implements IUserPackage {
   @Prop({ type: Date })
   endDate: Date;
 
+  @Prop({ type: String, select: false, default: '' })
+  paymentMetaData: string;
+
   @Prop({ type: Boolean, default: false })
   isAutoRenew: boolean;
 
