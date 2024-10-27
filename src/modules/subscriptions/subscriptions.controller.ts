@@ -41,7 +41,7 @@ export class SubscriptionsController {
   }
 
   @Get()
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async findAll(@Query() payload: any) {
     const { page, limit, sort, ...others } = payload;
     return await this.subscriptionsService.findAll({
@@ -53,7 +53,7 @@ export class SubscriptionsController {
   }
 
   @Get(':id')
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async findOne(@Param('id') id: any) {
     return await this.subscriptionsService.findOne(id);
   }

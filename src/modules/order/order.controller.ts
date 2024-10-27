@@ -24,7 +24,7 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async create(
     @Body() payload: any | CreateOrderDto,
     @Req() req: { user: any },
@@ -35,7 +35,7 @@ export class OrderController {
   }
 
   @Get()
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async findAll(@Query() payload: any) {
     const { page, limit, sort, ...others } = payload;
     return await this.orderService.findAll({
@@ -47,7 +47,7 @@ export class OrderController {
   }
 
   @Get('/my-orders')
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async findUserOrders(@Query() payload: any, @Req() req: { user: any }) {
     const { page, limit, sort, ...others } = payload;
     const id = req.user._id as any;
@@ -61,13 +61,13 @@ export class OrderController {
   }
 
   @Get(':id')
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async findById(@Param('id') id: any) {
     return await this.orderService.findById(id);
   }
 
   @Put(':id')
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async update(@Param('id') id: any, @Body() payload: UpdateOrderDto) {
     return await this.orderService.update(id, payload);
   }

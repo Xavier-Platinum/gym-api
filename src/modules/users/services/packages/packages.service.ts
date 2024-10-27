@@ -52,14 +52,22 @@ export class PackagesService {
       //   );
       // }
 
-      const isSubscribed = await this.userPackageRepository.exists({
+      const isSubscribed = await this.userPackageRepository.byQuery({
         user: user,
       });
 
       console.log(isSubscribed);
 
-      if (isSubscribed) {
-        throw new HttpException('User already has a subscription', 400);
+      if (isSubscribed.status === 'pending') {
+        const order: any = await this.eventEmitter.emitAsync('order.verify', {
+          _id: isSubscribed?._id,
+        });
+
+        return {
+          statusCode: HttpStatus.PAYMENT_REQUIRED,
+          message: 'You have a pending order please proceed to payment',
+          data: { url: order?.paymentMetaData },
+        };
       }
 
       // Validate that all subscriptions exist
@@ -80,6 +88,15 @@ export class PackagesService {
       const order: any = await this.eventEmitter.emitAsync(
         'order.create',
         orderData,
+      );
+
+      await this.userPackageRepository.update(
+        { _id: isSubscribed?._id },
+        {
+          $set: {
+            paymentMetaData: order[0].data.url,
+          },
+        },
       );
 
       return order[0];

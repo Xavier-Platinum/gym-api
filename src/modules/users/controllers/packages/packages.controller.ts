@@ -13,14 +13,14 @@ export class PackagesController {
   constructor(private readonly packagesService: PackagesService) {}
 
   @Post('subscribe')
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async subscribe(@Body() payload: CreateSubscribeDto, @Req() req: Request) {
     const user = req.user as any;
     return await this.packagesService.create(payload, user?._id);
   }
 
   @Get()
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async getUserSubscriptions(@Req() req: Request) {
     const user = req.user as any;
     return await this.packagesService.getUserSubscriptions(user?._id);

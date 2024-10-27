@@ -42,14 +42,20 @@ export class AuthController {
 
   @Post('/register')
   // @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(ROLES.SuperAdmin, ROLES.User)
+  // @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async register(@Body() payload: CreateUserDto) {
+    return await this.authService.register(payload);
+  }
+
+  // @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
+  async registerSuperAdmin(@Body() payload: CreateUserDto) {
     return await this.authService.register(payload);
   }
 
   @Post('/protected')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async getProtected(@Request() req: any) {
     return {
       message: 'This is a protected route!',

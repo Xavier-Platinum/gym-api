@@ -41,7 +41,7 @@ export class AddonsController {
   }
 
   @Get()
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   findAll(@Query() payload: any) {
     const { page, limit, sort, ...others } = payload;
     return this.addonService.findAll({
@@ -53,7 +53,7 @@ export class AddonsController {
   }
 
   @Get(':id')
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   findOne(@Param('id') id: any) {
     return this.addonService.findOne(id);
   }

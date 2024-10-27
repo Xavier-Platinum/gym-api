@@ -24,7 +24,7 @@ export class TransactionsController {
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async create(
     @Body() payload: CreateTransactionDto,
     @Req() req: { user: any },
@@ -48,7 +48,7 @@ export class TransactionsController {
   }
 
   @Get('/verify')
-  // @Roles(ROLES.SuperAdmin, ROLES.User)
+  // @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async verify(
     @Query()
     {
@@ -73,14 +73,14 @@ export class TransactionsController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async findOne(@Param('id') id: any) {
     return await this.transactionsService.findOne(id);
   }
 
   @Get('/user/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async history(@Param('userId') id: any) {
     return await this.transactionsService.history(id);
   }

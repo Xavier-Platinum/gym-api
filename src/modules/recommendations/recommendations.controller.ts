@@ -42,7 +42,7 @@ export class RecommendationsController {
   }
 
   @Get()
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async findAll(@Query() payload: any) {
     const { page, limit, sort, ...others } = payload;
     return await this.recommendationsService.findAll({
@@ -54,7 +54,7 @@ export class RecommendationsController {
   }
 
   @Get(':id')
-  @Roles(ROLES.SuperAdmin, ROLES.User)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   findOne(@Param('id') id: string) {
     return this.recommendationsService.findOne(+id);
   }
