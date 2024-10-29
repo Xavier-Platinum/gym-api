@@ -88,7 +88,7 @@ export class PackagesService {
       const orderData = {
         userId: user,
         items: [ids],
-        totalAmount: totalAmount || payload?.totalAmount,
+        totalAmount: payload?.totalAmount,
         paymentMethod: payload.paymentMethod,
         paymentGateway: payload?.paymentGateway,
       };
