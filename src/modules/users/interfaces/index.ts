@@ -7,6 +7,7 @@ export interface IUserPackage {
   startDate: Date;
   endDate: Date;
   isAutoRenew: boolean;
+  isActive: boolean;
   renewals: IRenewal[];
   addons: Schema.Types.ObjectId[];
   status: string;
