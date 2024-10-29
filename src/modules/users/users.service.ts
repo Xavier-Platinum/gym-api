@@ -364,10 +364,10 @@ export class UsersService {
         throw new NotFoundException('User not found');
       }
 
-      const updatedUser = await this.userRepository.update(id, {
+      const updatedUser = await this.userRepository.findAndUpdate(id, {
         // $set: { name: payload. },
         // $push: { permissions: payload.permissions },
-        payload,
+        ...payload,
       });
 
       return {
