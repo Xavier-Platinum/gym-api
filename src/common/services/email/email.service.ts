@@ -10,8 +10,8 @@ export class EmailService {
   constructor(private configService: ConfigService) {
     this.transporter = nodemailer.createTransport({
       host: this.configService.get<string>('email.host'),
-      port: this.configService.get<number>('email.port'),
-      secure: this.configService.get<boolean>('email.secure'),
+      port: 465, //this.configService.get<number>('email.port'),
+      secure: true, // this.configService.get<boolean>('email.secure'),
       auth: {
         user: this.configService.get<string>('email.auth.user'),
         pass: this.configService.get<string>('email.auth.pass'),
