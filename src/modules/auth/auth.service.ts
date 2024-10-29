@@ -99,7 +99,7 @@ export class AuthService {
       const isExist = await this.userRepository.exists({
         $or: [
           { email: payload?.email },
-          { fullName: payload?.fullName },
+          // { fullName: payload?.fullName },
           { phoneNumber: payload?.phoneNumber },
         ],
       });
