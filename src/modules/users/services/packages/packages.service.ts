@@ -33,7 +33,10 @@ export class PackagesService {
     await this.userPackageRepository.findAndUpdate(
       { _id: payload.package },
       {
-        $set: { status: payload?.status },
+        $set: {
+          status: payload?.status,
+          isActive: payload?.status === 'success' ? true : false,
+        },
       },
     );
   }
@@ -54,26 +57,26 @@ export class PackagesService {
 
       console.log('Here');
 
-      const isExist = await this.userPackageRepository.exists({
-        user: user,
-      });
+      // const isExist = await this.userPackageRepository.exists({
+      //   user: user,
+      // });
 
-      if (isExist) {
-        const isSubscribed = await this.userPackageRepository.byQuery({
-          user: user,
-        });
-        if (isSubscribed.status === 'pending') {
-          const order: any = await this.eventEmitter.emitAsync('order.verify', {
-            _id: isSubscribed?._id,
-          });
+      // if (isExist) {
+      //   const isSubscribed = await this.userPackageRepository.byQuery({
+      //     user: user,
+      //   });
+      //   if (isSubscribed.status === 'pending') {
+      //     const order: any = await this.eventEmitter.emitAsync('order.verify', {
+      //       _id: isSubscribed?._id,
+      //     });
 
-          return {
-            statusCode: HttpStatus.PAYMENT_REQUIRED,
-            message: 'You have a pending order please proceed to payment',
-            data: { url: order?.paymentMetaData },
-          };
-        }
-      }
+      //     return {
+      //       statusCode: HttpStatus.PAYMENT_REQUIRED,
+      //       message: 'You have a pending order please proceed to payment',
+      //       data: { url: order?.paymentMetaData },
+      //     };
+      //   }
+      // }
 
       // Validate that all subscriptions exist
       await this.validateSubscriptionsExist(payload.item);

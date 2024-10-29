@@ -37,6 +37,9 @@ export class UserPackage extends Document implements IUserPackage {
   @Prop({ type: Boolean, default: false })
   isAutoRenew: boolean;
 
+  @Prop({ type: Boolean, default: false })
+  isActive: boolean;
+
   @Prop({
     type: [
       {
