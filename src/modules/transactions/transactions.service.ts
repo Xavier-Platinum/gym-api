@@ -128,11 +128,19 @@ export class TransactionsService {
             path: 'userId',
             model: 'User',
             select: '-createdAt -updatedAt',
+            // populate: [
+            //   {
+            //     path: 'roles.roleId',
+            //     model: 'Role',
+            //     select: '-createdAt -updatedAt',
+            //   },
+            // ],
           },
           {
             path: 'orderId',
             model: 'Order',
             select: '-createdAt -updatedAt',
+            populate: ['userId', 'items'],
           },
         ],
       });
