@@ -137,8 +137,8 @@ export class TransactionsService {
         ],
       });
 
-      if (!data || data.data.length) {
-        throw new NotFoundException('No subscriptions found');
+      if (!data || !data.data.length) {
+        throw new NotFoundException('No transactions found');
       }
 
       return {

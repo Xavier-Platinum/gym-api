@@ -154,12 +154,60 @@ export class UsersService {
     };
   }
 
+  async findAllAdmins(payload: PaginateUserDto): Promise<any> {
+    try {
+      payload.conditions.isDeleted = false;
+      payload.conditions.isSuperAdmin = false;
+      const role = await this.rolesRepository.byQuery({ name: 'Admin' });
+
+      payload.conditions = this.buildOrQuery(payload.conditions);
+
+      payload.conditions['roles.roleId'] = role._id;
+
+      console.log(payload);
+      const users = await this.userRepository.paginate({
+        ...payload,
+        populate: [
+          {
+            path: 'roles.roleId',
+            model: 'Role',
+            // select: '-createdAt -updatedAt',
+          },
+          // {
+          //   path: 'subscriptions.subscriptionId',
+          //   model: 'Subscription',
+          //   // select: '-createdAt -updatedAt',
+          // },
+        ],
+      });
+
+      if (!users || !users.data.length) {
+        throw new NotFoundException('No users found');
+      }
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Admin Users found successfully',
+        data: users,
+      };
+    } catch (error) {
+      console.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException();
+    }
+  }
+
   async findAll(payload: PaginateUserDto): Promise<any> {
     try {
       payload.conditions.isDeleted = false;
       payload.conditions.isSuperAdmin = false;
+      const role = await this.rolesRepository.byQuery({ name: 'User' });
 
       payload.conditions = this.buildOrQuery(payload.conditions);
+
+      payload.conditions['roles.roleId'] = role._id;
 
       console.log(payload);
       const users = await this.userRepository.paginate({
