@@ -309,6 +309,10 @@ export class AuthService {
 
   async forgotPassword(email: string): Promise<any> {
     try {
+      if (!email) {
+        throw new HttpException('Email is required', 400);
+      }
+
       const user = await this.userService.findUserByEmail(email);
       if (!user) {
         throw new NotFoundException('User not found');
@@ -354,11 +358,12 @@ export class AuthService {
       });
 
       if (!decoded) {
-        throw new UnauthorizedException('Token verification failed or expired');
+        throw new HttpException('Token verification failed or expired', 400);
       }
 
       const user = await this.userService.findUserByToken(payload.token);
-      if (!user || user.authToken === null) {
+
+      if (!user || user.authToken === 'null') {
         throw new NotFoundException('Verification failed, please try again');
       }
 
@@ -370,14 +375,17 @@ export class AuthService {
         },
       );
 
-      await this.userService.update(user.id, { authToken: null });
+      await this.userRepository.findAndUpdate(user?._id, {
+        $set: { authToken: 'null' },
+      });
 
       return {
-        statusCode: HttpStatus.NO_CONTENT,
+        statusCode: HttpStatus.OK,
         message: 'Verification successful',
         data: newToken,
       };
     } catch (error) {
+      console.log(error);
       if (error instanceof HttpException) {
         throw error;
       }
@@ -387,25 +395,36 @@ export class AuthService {
 
   async resetPassword(token: string, payload: any): Promise<any> {
     try {
+      if (!token) {
+        throw new HttpException('auth-token header is required', 400);
+      }
+
+      if (payload.password) {
+        throw new HttpException('password is required', 400);
+      }
+
       const decoded = this.jwtService.verify(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
 
       if (!decoded) {
-        throw new UnauthorizedException('Session expired please try again');
+        throw new HttpException('Session expired please try again', 400);
       }
 
-      const user = await this.userService.findUserByEmail(token);
+      const user = await this.userRepository.byQuery({ email: decoded?.email });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      await this.userService.update(user.id, { password: payload.password });
+      await this.userRepository.findAndUpdate(user._id, {
+        $set: { password: payload.password },
+      });
 
       return {
-        statusCode: HttpStatus.NO_CONTENT,
+        statusCode: HttpStatus.OK,
         message: 'Password reset successfully',
       };
     } catch (error) {
+      console.error(error);
       if (error instanceof HttpException) {
         throw error;
       }

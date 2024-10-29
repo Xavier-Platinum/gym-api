@@ -128,17 +128,25 @@ export class TransactionsService {
             path: 'userId',
             model: 'User',
             select: '-createdAt -updatedAt',
+            // populate: [
+            //   {
+            //     path: 'roles.roleId',
+            //     model: 'Role',
+            //     select: '-createdAt -updatedAt',
+            //   },
+            // ],
           },
           {
             path: 'orderId',
             model: 'Order',
             select: '-createdAt -updatedAt',
+            populate: ['userId', 'items'],
           },
         ],
       });
 
-      if (!data || data.data.length) {
-        throw new NotFoundException('No subscriptions found');
+      if (!data || !data.data.length) {
+        throw new NotFoundException('No transactions found');
       }
 
       return {

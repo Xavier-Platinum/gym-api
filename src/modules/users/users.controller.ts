@@ -116,6 +116,19 @@ export class UsersController {
     });
   }
 
+  @Get('/admins')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin)
+  async findAllAdmins(@Query() payload: any) {
+    const { page, limit, sort, ...others } = payload;
+    return await this.usersService.findAllAdmins({
+      page: page,
+      limit: limit,
+      sort: sort,
+      conditions: { ...others },
+    });
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)

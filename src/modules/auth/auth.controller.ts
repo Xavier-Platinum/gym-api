@@ -15,6 +15,7 @@ import {
   Request,
   Res,
   HttpStatus,
+  HttpException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
@@ -86,7 +87,6 @@ export class AuthController {
     @Req() req: Request,
   ) {
     const token = req.headers?.['auth-token'] as string;
-    console.log(token);
 
     if (!token) {
       throw new BadRequestException('Token is required');
@@ -101,10 +101,9 @@ export class AuthController {
     @Req() req: Request,
   ) {
     const token = req.headers?.['auth-token'] as string;
-    console.log(token);
 
     if (!token) {
-      throw new BadRequestException('Token is required');
+      throw new HttpException('Token is required', 400);
     }
 
     return this.authService.resetPassword(token, payload);
