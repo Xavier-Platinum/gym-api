@@ -217,6 +217,7 @@ export class PackagesService {
             select: '-createdAt -updatedAt',
           },
         ],
+        projections: '-user',
       });
 
       if (!data || !data.length) {
