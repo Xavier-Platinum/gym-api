@@ -19,7 +19,7 @@ export class UserPackage extends Document implements IUserPackage {
   @Prop({ type: Number })
   duration: number;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', select: false })
   user: MongooseSchema.Types.ObjectId;
 
   @Prop({ type: [MongooseSchema.Types.ObjectId], ref: 'Subscription' })

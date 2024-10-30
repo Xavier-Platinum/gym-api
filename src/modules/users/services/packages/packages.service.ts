@@ -29,13 +29,18 @@ export class PackagesService {
 
   @OnEvent('order.verified')
   async updatePackageStatus(payload: any): Promise<void> {
-    console.log(payload);
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(startDate.getDate() + 30);
+
     await this.userPackageRepository.findAndUpdate(
       { _id: payload.package },
       {
         $set: {
           status: payload?.status,
           isActive: payload?.status === 'success' ? true : false,
+          startDate: startDate,
+          endDate: endDate,
         },
       },
     );
@@ -199,10 +204,10 @@ export class PackagesService {
         conditions: { user },
         sort: '-createdAt',
         populate: [
-          {
-            path: 'user',
-            select: '-createdAt -updatedAt',
-          },
+          // {
+          //   path: 'user',
+          //   select: '-createdAt -updatedAt',
+          // },
           {
             path: 'subscription',
             select: '-createdAt -updatedAt',
