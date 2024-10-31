@@ -122,6 +122,32 @@ export class PackagesService {
     }
   }
 
+  async getAnalytics(query: object, pagination: object): Promise<any> {
+    const data = await this.userPackageRepository.paginate({
+      ...pagination,
+      conditions: { ...query, isActive: true },
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Subscribers found successfully',
+      data,
+    };
+  }
+
+  async allSubscribers(query: object, pagination: object): Promise<any> {
+    const data = await this.userPackageRepository.paginate({
+      ...pagination,
+      conditions: { ...query, isActive: true },
+    });
+
+    return {
+      statusCode: 200,
+      message: 'Subscribers found successfully',
+      data,
+    };
+  }
+
   private async validateSubscriptionsExist(items: {
     subscription: Schema.Types.ObjectId[];
     addons: Schema.Types.ObjectId[];

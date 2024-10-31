@@ -5,6 +5,7 @@ import { TransactionsService } from '../transactions/transactions.service';
 import { SubscriptionsService } from '../subscriptions/subscriptions.service';
 import { OrderService } from '../order/order.service';
 import { FilterQuery } from 'mongoose';
+import { PackagesService } from '../users/services/packages/packages.service';
 
 @Injectable()
 export class AnalyticsService {
@@ -13,6 +14,7 @@ export class AnalyticsService {
     private readonly transactionsService: TransactionsService,
     private readonly ordersService: OrderService,
     private readonly subscriptionsService: SubscriptionsService,
+    private readonly subscribers: PackagesService,
     private readonly cacheService: CacheService,
   ) {}
 
@@ -39,18 +41,31 @@ export class AnalyticsService {
     let analytics = await this.cacheService.get(cacheKey);
 
     if (!analytics) {
-      const [users, transactions, orders, subscriptions] = await Promise.all([
-        this.usersService.getAnalytics(query, pagination),
-        this.transactionsService.getAnalytics(query, pagination),
-        this.ordersService.getAnalytics(query, pagination),
-        this.subscriptionsService.getAnalytics(query, pagination),
-      ]);
+      const [users, transactions, orders, subscriptions, subscribers] =
+        await Promise.all([
+          this.usersService.getAnalytics(query, pagination),
+          this.transactionsService.getAnalytics(query, pagination),
+          this.ordersService.getAnalytics(query, pagination),
+          this.subscriptionsService.getAnalytics(query, pagination),
+          this.subscribers.getAnalytics(query, pagination),
+        ]);
 
       analytics = {
-        users,
-        transactions,
-        orders,
-        subscriptions,
+        users: {
+          total: users?.data?.total,
+        },
+        transactions: {
+          total: transactions?.data?.total,
+        },
+        orders: {
+          total: orders?.data?.total,
+        },
+        subscriptions: {
+          total: subscriptions?.data?.total,
+        },
+        subscribers: {
+          total: subscribers?.data?.total,
+        },
       };
 
       await this.cacheService.set(cacheKey, analytics, { ttl: 600 });

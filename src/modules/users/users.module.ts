@@ -42,6 +42,7 @@ import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
     UserRepository,
     CloudinaryService,
     UserPackageRepository,
+    PackagesService,
   ],
 })
 export class UsersModule {}
