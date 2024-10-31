@@ -49,19 +49,19 @@ export class CreateSubscriptionDto {
 
   @IsNumber()
   @Type(() => Number)
-  durationInMonths: number;
+  durationInMonths?: number;
 
   @IsBoolean()
   @Type(() => Boolean)
-  isRecurring: boolean;
+  isRecurring?: boolean;
 
   @ValidateNested()
   @Type(() => RenewalSettingsDto)
-  renewalSettings: RenewalSettingsDto;
+  renewalSettings?: RenewalSettingsDto;
 
   @IsArray()
   @IsString({ each: true })
-  services: string[];
+  services?: string[];
 }
 
 export class PaginateSubsDto {
