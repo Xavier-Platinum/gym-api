@@ -13,12 +13,14 @@ import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { SubscriptionRepository } from './entities/subscription.repository';
 import { FilterQuery } from 'mongoose';
 import { CloudinaryService } from 'src/common/services/cloudinary/cloudinary.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class SubscriptionsService {
   constructor(
     private readonly subscriptionRepository: SubscriptionRepository,
     private readonly uploadService: CloudinaryService,
+    private eventEmitter: EventEmitter2,
   ) {}
   async create(payload: CreateSubscriptionDto, image: Express.Multer.File) {
     try {
@@ -42,7 +44,22 @@ export class SubscriptionsService {
         };
       }
 
-      await this.subscriptionRepository.create({ ...payload });
+      const subscription = await this.subscriptionRepository.create({
+        ...payload,
+      });
+
+      this.eventEmitter.emit('BroadcastNotification', {
+        title: 'Subscriptions Notification',
+        body: JSON.stringify({
+          message: 'New subscriptions added check it out.',
+          data: {
+            name: subscription.name,
+            _id: subscription?._id,
+            description: subscription?.description,
+            image: subscription?.image,
+          },
+        }),
+      });
 
       return {
         statusCode: HttpStatus.CREATED,

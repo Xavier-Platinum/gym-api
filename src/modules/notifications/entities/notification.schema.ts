@@ -17,10 +17,10 @@ export class Notification extends Document implements INotification {
   body: string;
 
   @Prop({
-    enum: ['email', 'push', 'in_app'],
-    default: 'email',
+    enum: ['general', 'individual', 'in_app'],
+    default: 'individual',
   })
-  type: 'email' | 'push' | 'in_app';
+  type: 'general' | 'individual' | 'in_app';
 
   @Prop({
     enum: ['promotion', 'alert', 'reminder'],

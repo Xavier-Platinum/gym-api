@@ -13,12 +13,14 @@ import {
 } from '../../dto/create-subscription.dto';
 import { FilterQuery } from 'mongoose';
 import { UpdateAddonDto } from '../../dto/update-subscription.dto';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AddonsService {
   constructor(
     private readonly uploadService: CloudinaryService,
     private readonly addonRepository: AddonRepository,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async create(payload: CreateAddonDto, image: Express.Multer.File) {
@@ -40,7 +42,20 @@ export class AddonsService {
         };
       }
 
-      await this.addonRepository.create({ ...payload });
+      const addon = await this.addonRepository.create({ ...payload });
+
+      this.eventEmitter.emit('BroadcastNotification', {
+        title: 'Addons Notification',
+        body: JSON.stringify({
+          message: 'New addon added check it out.',
+          data: {
+            name: addon.name,
+            _id: addon?._id,
+            description: addon?.description,
+            image: addon?.image,
+          },
+        }),
+      });
 
       return {
         statusCode: HttpStatus.CREATED,
