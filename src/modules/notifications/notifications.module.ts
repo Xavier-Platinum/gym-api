@@ -7,12 +7,16 @@ import {
   Notification,
   NotificationSchema,
 } from './entities/notification.schema';
+import { ServicesModule } from 'src/common/services/services.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Notification.name, schema: NotificationSchema },
     ]),
+    ServicesModule,
+    UsersModule,
   ],
   exports: [NotificationsService],
   controllers: [NotificationsController],
