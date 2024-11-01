@@ -21,6 +21,10 @@ export class ValidateUserDto {
   @IsNotEmpty()
   @MinLength(8)
   readonly password: string;
+
+  @IsString()
+  @IsNotEmpty()
+  readonly deviceToken: string;
 }
 
 export class CreateRoleDto {
