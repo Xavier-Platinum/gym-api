@@ -266,11 +266,15 @@ export class AuthService {
     }
   }
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(
+    email: string,
+    password: string,
+    deviceToken: string,
+  ): Promise<any> {
     try {
       const user = await this.userService.findByEmail(email, password);
       if (user) {
-        return await this.login(user);
+        return await this.login(user, deviceToken);
       }
       throw new UnauthorizedException();
     } catch (error) {
@@ -282,13 +286,22 @@ export class AuthService {
     }
   }
 
-  async login(user: any) {
+  async login(user: any, deviceToken: string) {
     const payload = {
       email: user.email,
       sub: user._id,
       role: user.roles,
     };
     user.password = '';
+
+    await this.userRepository.findAndUpdate(
+      { email: user?.email },
+      {
+        $set: {
+          deviceToken: deviceToken,
+        },
+      },
+    );
 
     return {
       status: HttpStatus.OK,

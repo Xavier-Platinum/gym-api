@@ -67,13 +67,21 @@ export class AuthController {
   @Post('/validate-user')
   @HttpCode(200)
   async validateUser(@Body() payload: ValidateUserDto) {
-    return this.authService.validateUser(payload?.email, payload?.password);
+    return this.authService.validateUser(
+      payload?.email,
+      payload?.password,
+      payload?.deviceToken,
+    );
   }
 
   @Post('/login')
   @HttpCode(200)
   async login(@Body() payload: ValidateUserDto | any) {
-    return this.authService.validateUser(payload?.email, payload?.password);
+    return this.authService.validateUser(
+      payload?.email,
+      payload?.password,
+      payload?.deviceToken,
+    );
   }
 
   @Post('/forgotPassword')
