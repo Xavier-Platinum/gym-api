@@ -4,8 +4,18 @@ export class CreateNotificationDto {
   userId: Schema.Types.ObjectId;
   title: string;
   body: string;
-  type: 'in_app' | 'push' | 'email';
-  category: 'promotion' | 'alert' | 'reminder';
-  priority: 'low' | 'medium' | 'high';
+  type: 'general' | 'individual' | 'in_app';
+  category?: 'promotion' | 'alert' | 'reminder';
+  priority?: 'low' | 'medium' | 'high';
+  scheduledAt?: Date;
+}
+
+export class BroadcastCreateNotificationDto {
+  userId?: Schema.Types.ObjectId;
+  title: string;
+  body: string;
+  type?: 'general' | 'individual' | 'in_app';
+  category?: 'promotion' | 'alert' | 'reminder';
+  priority?: 'low' | 'medium' | 'high';
   scheduledAt?: Date;
 }

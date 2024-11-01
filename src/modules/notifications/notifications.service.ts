@@ -1,17 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { chunk } from 'lodash';
 import {
   HttpException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CreateNotificationDto } from './dto/create-notification.dto';
+import {
+  BroadcastCreateNotificationDto,
+  CreateNotificationDto,
+} from './dto/create-notification.dto';
 import { UpdateNotificationDto } from './dto/update-notification.dto';
 import { NotificationRepository } from './entities/notification.repository';
 import * as admin from 'firebase-admin';
 import { Notification } from './entities/notification.schema';
 import { FirebaseService } from 'src/common/services/firebase/firebase.service';
 import { UserRepository } from '../users/entities/user.repository';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class NotificationsService {
@@ -19,11 +24,96 @@ export class NotificationsService {
     private readonly notificationRepository: NotificationRepository,
     private readonly firebaseService: FirebaseService,
     private readonly userRepository: UserRepository,
+    private eventEmitter: EventEmitter2,
   ) {
     // admin.initializeApp({
     //   credential: admin.credential.applicationDefault(),
     // });
   }
+
+  private readonly BATCH_SIZE = 500;
+
+  @OnEvent('sendNotification')
+  async sendNotification(payload: CreateNotificationDto) {
+    try {
+      const userSubscription = await this.userRepository.byQuery({
+        _id: payload?.userId,
+      });
+      if (!userSubscription || !userSubscription.deviceToken) {
+        throw new HttpException('User not subscribed', HttpStatus.BAD_REQUEST);
+      }
+      const notification = await this.notificationRepository.create(payload);
+      await this.firebaseService.sendNotification([userSubscription.fcmToken], {
+        notification: {
+          title: payload.title,
+          body: payload.body,
+        },
+        // priority: payload.priority,
+      });
+      return {
+        statusCode: 201,
+        message: 'Notification created successfully',
+        data: notification,
+      };
+    } catch (error) {
+      console.log(error);
+      if (error instanceof HttpException) {
+        throw new HttpException(error?.message, 400);
+      }
+
+      throw new HttpException(error?.message, 400);
+    }
+  }
+
+  @OnEvent('sendBroadcast')
+  async handleBroadcastEvent(notification: BroadcastCreateNotificationDto) {
+    try {
+      const allUsers = await this.userRepository.byQuery({}, [
+        'deviceToken',
+        '_id',
+      ]);
+      const validTokens = allUsers
+        .map((user) => user.deviceToken)
+        .filter((token) => token && token.trim().length > 0);
+
+      if (validTokens.length === 0) {
+        throw new HttpException(
+          'No valid device tokens found',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Split device tokens into manageable batches
+      const tokenBatches = chunk(validTokens, this.BATCH_SIZE);
+
+      // Send each batch in sequence
+      for (const batch of tokenBatches) {
+        await this.firebaseService.sendNotification(batch, {
+          notification: {
+            title: notification.title,
+            body: notification.body,
+          },
+        });
+        console.log(`Sent batch with ${batch.length} notifications.`);
+      }
+
+      console.log(
+        `Broadcast notifications sent to ${validTokens.length} users.`,
+      );
+    } catch (error) {
+      console.error('Error sending broadcast notifications:', error);
+      throw new HttpException(
+        error?.message || 'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  @OnEvent('BroadcastNotification')
+  async BroadcastSendBroadcast(payload: CreateNotificationDto) {
+    await this.createBroadcastNotification(payload);
+  }
+
   // Create and schedule a notification
   async create(
     payload: CreateNotificationDto,
@@ -139,25 +229,41 @@ export class NotificationsService {
     }
   }
 
-  async broadcastNotification(notificationData: any) {
+  async createBroadcastNotification(
+    notificationData: BroadcastCreateNotificationDto,
+  ) {
     try {
-      const allTokens = await this.userRepository.byQuery(
-        {},
-        ['deviceToken _id'],
-        null,
-        null,
-      );
-      const tokens = allTokens.map(
-        (tokenDoc) => tokenDoc.fcmToken === ''.length,
-      );
-      await this.firebaseService.sendNotification(tokens, notificationData);
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw new HttpException(error?.message, 400);
-      }
+      notificationData.type = 'general';
+      const allUsers = await this.userRepository.byQuery({}, [
+        'deviceToken',
+        '_id',
+      ]);
 
-      // throw new InternalServerErrorException();
-      throw new HttpException(error?.message, 400);
+      // Create individual notifications for each user
+      allUsers.map(async (user) => {
+        await this.notificationRepository.create({
+          userId: user._id,
+          title: notificationData.title,
+          body: notificationData.body,
+          type: notificationData.type,
+          // status: false,
+          // createdAt: new Date(),
+        });
+      });
+
+      // Emit an event to trigger the batch FCM push notifications
+      this.eventEmitter.emit('sendBroadcast', notificationData);
+
+      return {
+        statusCode: 201,
+        message: 'Broadcast notification created and saved to each user',
+      };
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        error?.message || 'Internal Server Error',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
   }
 

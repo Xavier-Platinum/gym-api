@@ -60,7 +60,9 @@ export class NotificationsController {
   @Post('/broadcast')
   @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async broadcast(@Body('notification') notification: any) {
-    return await this.notificationService.broadcastNotification(notification);
+    return await this.notificationService.createBroadcastNotification(
+      notification,
+    );
     return { message: 'Broadcast sent to all users' };
   }
 
