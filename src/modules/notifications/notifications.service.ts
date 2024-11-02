@@ -415,4 +415,46 @@ export class NotificationsService {
       throw new HttpException(error?.message, 400);
     }
   }
+
+  async findOne(id: any) {
+    try {
+      const data = await this.notificationRepository.byQuery(
+        { _id: id },
+        null,
+        null,
+        [
+          {
+            path: 'userId',
+            select: '',
+          },
+        ],
+      );
+
+      if (!data) throw new HttpException('No notification', 400);
+
+      await this.notificationRepository.findAndUpdate(
+        { _id: id },
+        {
+          $set: {
+            status: 'read',
+          },
+        },
+      );
+
+      data.status = 'read';
+
+      return {
+        statusCode: 200,
+        message: 'Single notification',
+        data,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw new HttpException(error?.message, 400);
+      }
+
+      // throw new InternalServerErrorException();
+      throw new HttpException(error?.message, 400);
+    }
+  }
 }

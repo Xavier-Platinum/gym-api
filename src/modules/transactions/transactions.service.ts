@@ -66,11 +66,24 @@ export class TransactionsService {
         transactionRef,
       );
 
-      await this.transactionRepository.create({
+      const transactions = await this.transactionRepository.create({
         ...payload,
         transactionRef,
         status: paymentResponse?.status,
         paymentMetadata: paymentResponse.metadata,
+      });
+
+      this.eventEmitter.emit('BroadcastNotification', {
+        title: 'Transactions Notification',
+        body: JSON.stringify({
+          message: 'You made a new transaction.',
+          data: {
+            // name: addon.name,
+            _id: transactions?._id,
+            status: transactions?.status,
+            amount: transactions?.amount,
+          },
+        }),
       });
 
       return {
@@ -140,7 +153,26 @@ export class TransactionsService {
             path: 'orderId',
             model: 'Order',
             select: '-createdAt -updatedAt',
-            populate: ['userId', 'items'],
+            populate: [
+              {
+                path: 'userId',
+                select: '',
+              },
+              {
+                path: 'items',
+                select: '',
+                populate: [
+                  {
+                    path: 'subscription',
+                    select: '',
+                  },
+                  {
+                    path: 'addons',
+                    select: '',
+                  },
+                ],
+              },
+            ],
           },
         ],
       });

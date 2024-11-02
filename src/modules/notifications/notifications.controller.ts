@@ -72,6 +72,12 @@ export class NotificationsController {
     return await this.notificationService.update(id, payload);
   }
 
+  @Get(':id')
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
+  async findOne(@Param('id') id: any) {
+    return await this.notificationService.findOne(id);
+  }
+
   @Get('/user/:userId')
   @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async getUserNotifications(@Param('userId') userId: any) {
