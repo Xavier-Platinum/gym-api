@@ -36,7 +36,7 @@ export class TransactionsController {
 
   @Get()
   @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles(ROLES.SuperAdmin)
+  @Roles(ROLES.SuperAdmin)
   async findAll(@Query() payload: any) {
     const { page, limit, sort, ...others } = payload;
     return await this.transactionsService.findAll({

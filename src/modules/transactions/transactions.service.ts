@@ -207,11 +207,38 @@ export class TransactionsService {
             path: 'userId',
             model: 'User',
             select: '-createdAt -updatedAt',
+            // populate: [
+            //   {
+            //     path: 'roles.roleId',
+            //     model: 'Role',
+            //     select: '-createdAt -updatedAt',
+            //   },
+            // ],
           },
           {
             path: 'orderId',
             model: 'Order',
             select: '-createdAt -updatedAt',
+            populate: [
+              {
+                path: 'userId',
+                select: '',
+              },
+              {
+                path: 'items',
+                select: '',
+                populate: [
+                  {
+                    path: 'subscription',
+                    select: '',
+                  },
+                  {
+                    path: 'addons',
+                    select: '',
+                  },
+                ],
+              },
+            ],
           },
         ],
         '-createdAt',
