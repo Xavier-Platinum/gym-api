@@ -10,10 +10,16 @@ import { INotification } from '../interfaces';
   toJSON: { getters: true, virtuals: true, versionKey: false },
 })
 export class Notification extends Document implements INotification {
+  @Prop({ type: String })
+  resourceUrl: string;
+
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', default: null })
   userId: MongooseSchema.Types.ObjectId;
 
+  @Prop({ type: String })
   title: string;
+
+  @Prop({ type: String })
   body: string;
 
   @Prop({

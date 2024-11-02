@@ -5,6 +5,7 @@ export interface INotification {
   userId: Schema.Types.ObjectId | any;
   title: string;
   body: string;
+  resourceUrl: string;
   type: 'general' | 'individual' | 'in_app';
   category: 'promotion' | 'alert' | 'reminder';
   priority: 'low' | 'medium' | 'high';
