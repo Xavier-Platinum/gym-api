@@ -8,9 +8,10 @@ RUN npm install
 
 COPY . .
 
+# Run the build command to create the dist folder
 RUN npm run build
 
 EXPOSE 8080
 
-# Step 8: Start the application
-CMD ["npm", "run", "start:prod"]
+# Run the app in production mode
+CMD ["node", "dist/main.js"]
