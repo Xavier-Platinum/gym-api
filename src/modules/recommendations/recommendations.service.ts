@@ -149,7 +149,7 @@ export class RecommendationsService {
       const update = await this.recommendationsRepository.findAndUpdate(
         { _id: id },
         {
-          payload,
+          $set: { ...payload },
         },
       );
 

@@ -368,10 +368,10 @@ export class TransactionsService {
         throw new NotFoundException('Transaction not found');
       }
 
-      const update = await this.transactionRepository.update(
+      const update = await this.transactionRepository.findAndUpdate(
         { _id: id },
         {
-          payload,
+          $set: { ...payload },
         },
       );
 

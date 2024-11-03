@@ -190,7 +190,7 @@ export class SubscriptionsService {
       const update = await this.subscriptionRepository.findAndUpdate(
         { _id: id },
         {
-          payload,
+          $set: { ...payload },
         },
       );
 
