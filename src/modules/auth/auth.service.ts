@@ -100,7 +100,7 @@ export class AuthService {
         $or: [
           { email: payload?.email },
           // { fullName: payload?.fullName },
-          { phoneNumber: payload?.phoneNumber },
+          // { phoneNumber: payload?.phoneNumber },
         ],
       });
 
