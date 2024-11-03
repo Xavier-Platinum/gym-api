@@ -179,7 +179,7 @@ export class AddonsService {
       const update = await this.addonRepository.findAndUpdate(
         { _id: id },
         {
-          payload,
+          $set: { ...payload },
         },
       );
 
