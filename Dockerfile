@@ -1,24 +1,28 @@
-# server/Dockerfile
-# Step 1: Use official Node.js image as base
-FROM node:18-alpine
+FROM node:20-alpine AS builder
 
-# Step 2: Set working directory
 WORKDIR /usr/src/app
 
-# Step 3: Copy the package.json and package-lock.json to install dependencies
 COPY package*.json ./
+RUN npm i
 
-# Step 4: Install dependencies
-RUN npm install
-
-# Step 5: Copy the rest of the application code
 COPY . .
 
-# Step 6: Build the NestJS application
 RUN npm run build
 
-# Step 7: Expose the backend port (default for NestJS is 3000)
-EXPOSE 3001
+FROM node:20-alpine
 
-# Step 8: Start the application
-CMD ["npm", "run", "start:prod"]
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/package*.json ./
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/dist ./dist
+
+ENV NODE_ENV=production
+ENV PORT=8080
+
+EXPOSE $PORT
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+
+CMD ["node", "dist/main"]
