@@ -1,0 +1,35 @@
+import mongoose, { ClientSession, FilterQuery, HydratedDocument, Model, UnpackedIntersection } from 'mongoose';
+import { PaginationQuery, Model as IModel, Projections, Archived, Populate, Sort, Keys, PaginationResult, IRepository } from './base.repository.interface';
+export declare const createRepoError: (message: string, name?: string, cause?: any) => Error;
+export declare abstract class EntityRepository<TModel extends IModel<NonNullable<unknown>>> implements IRepository<TModel> {
+    protected readonly model: Model<TModel>;
+    name: string;
+    session: ClientSession | null;
+    constructor(model: Model<TModel>);
+    private convertArchived;
+    private getQuery;
+    getModel(): mongoose.Model<TModel, {}, {}, {}, mongoose.IfAny<TModel, any, mongoose.Document<unknown, {}, TModel> & mongoose.Default__v<mongoose.Require_id<TModel>>>, any>;
+    connectDBSession(session: ClientSession): this;
+    disconnectDBSession(): this;
+    create(attributes: Partial<TModel>): Promise<TModel>;
+    byID(_id: string, projections?: Projections<TModel>, archived?: Archived): Promise<HydratedDocument<TModel>>;
+    all(query: PaginationQuery<TModel>): Promise<TModel[]>;
+    paginateV2(query: PaginationQuery<TModel>): Promise<PaginationResult<TModel>>;
+    paginate(query: PaginationQuery<TModel>): Promise<PaginationResult<TModel>>;
+    byQueryPromise(query: FilterQuery<TModel>, projections?: Projections<TModel>, archived?: Archived, populate?: Populate<TModel>, sort?: Sort): Promise<UnpackedIntersection<HydratedDocument<any>, NonNullable<unknown>>>;
+    rawFetchQuery(query: FilterQuery<TModel>, projections?: Projections<TModel>, archived?: Archived, populate?: Populate<TModel>, sort?: Sort): Promise<HydratedDocument<TModel>>;
+    byQuery(query: FilterQuery<TModel>, projections?: Projections<TModel>, archived?: Archived, populate?: Populate<TModel>, sort?: Sort): Promise<UnpackedIntersection<HydratedDocument<any>, NonNullable<unknown>>>;
+    byQueryLean(query: FilterQuery<TModel>, projections?: Projections<TModel>, archived?: Archived, populate?: Populate<TModel>, sort?: Sort): Promise<UnpackedIntersection<HydratedDocument<any>, NonNullable<unknown>>>;
+    count(query: FilterQuery<TModel>): Promise<number>;
+    distinct(field: Keys<TModel>, query: FilterQuery<TModel>): Promise<string[]>;
+    countDistinct(field: Keys<TModel>, query: FilterQuery<TModel>): Promise<number>;
+    exists(query: FilterQuery<TModel>): Promise<boolean>;
+    update(condition: FilterQuery<TModel>, update: mongoose.UpdateWithAggregationPipeline | mongoose.UpdateQuery<TModel>): Promise<HydratedDocument<TModel>>;
+    findAndUpdate(condition: FilterQuery<TModel>, update: mongoose.UpdateWithAggregationPipeline | mongoose.UpdateQuery<TModel>): Promise<HydratedDocument<TModel>>;
+    updateMany(condition: FilterQuery<TModel>, update: mongoose.UpdateQuery<TModel> | mongoose.UpdateWithAggregationPipeline): Promise<HydratedDocument<TModel>[]>;
+    softDelete(condition: FilterQuery<TModel>): Promise<TModel>;
+    softDeleteMany(condition: FilterQuery<TModel>): Promise<any[]>;
+    delete(condition: FilterQuery<TModel>): Promise<void>;
+    deleteAndReturnRecord(condition: FilterQuery<TModel>): Promise<HydratedDocument<TModel>>;
+    deleteMany(condition: FilterQuery<TModel>): Promise<void>;
+}

@@ -1,0 +1,15 @@
+import { Schema } from 'mongoose';
+export interface IRole {
+    readonly _id?: Schema.Types.ObjectId | any;
+    name: string;
+    permissions: string[];
+    isCustom: boolean;
+    assignedTo: Schema.Types.ObjectId[];
+    readonly createdAt?: Schema.Types.Date;
+    readonly updatedAt?: Schema.Types.Date;
+}
+export declare enum ROLES {
+    SuperAdmin = "SuperAdmin",
+    User = "User",
+    Admin = "Admin"
+}
