@@ -5,6 +5,10 @@ import { HttpExceptionFilter } from './common/utils/utils.filter';
 import { ValidationPipe } from '@nestjs/common';
 import session from 'express-session';
 import passport from 'passport';
+// import serverlessExpress from '@vendia/serverless-express';
+// import { Handler, Context, Callback } from 'aws-lambda';
+
+// let server: Handler;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -33,8 +37,28 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalFilters(new HttpExceptionFilter());
 
+  // Because of serveerless
   const port = configService.get<number>('PORT') || 3001;
   await app.listen(port || 3001, '0.0.0.0');
+
+  // await app.init();
+  // const expressApp = app.getHttpAdapter().getInstance();
+  // server = serverlessExpress({ app: expressApp });
 }
 
 bootstrap();
+
+// export const handler: Handler = async (
+//   event: any,
+//   context: Context,
+//   callback: Callback<any>,
+// ) => {
+//   if (!server) {
+//     await bootstrap();
+//   }
+//   // return {
+//   //   statusCode: 200,
+//   //   body: JSON.stringify({ message: 'Hello from Vercel!' }),
+//   // };
+//   return server(event, context, callback);
+// };

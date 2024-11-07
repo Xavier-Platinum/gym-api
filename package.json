@@ -8,8 +8,8 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest --max-old-space-size=512 start",
-    "start:dev": "nest --max-old-space-size=512 start --watch",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:live": "node --max-old-space-size=512 dist/main.js",
     "start:prod": "node dist/main",
@@ -34,6 +34,7 @@
     "@nestjs/platform-express": "^10.4.5",
     "@nestjs/platform-socket.io": "^10.4.6",
     "@nestjs/websockets": "^10.4.6",
+    "@vendia/serverless-express": "^4.12.6",
     "aws-lambda": "^1.0.7",
     "aws-serverless-express": "^3.4.0",
     "axios": "^1.7.7",
@@ -106,5 +107,8 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "engines": {
+    "node": "18.x"
   }
 }
