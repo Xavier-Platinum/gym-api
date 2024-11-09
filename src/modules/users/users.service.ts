@@ -358,17 +358,23 @@ export class UsersService {
 
   async update(id: any, payload: UpdateUserDto) {
     try {
+      console.log('update', id, payload);
       const isExist = await this.userRepository.exists({ _id: id });
+      console.log('exist update', isExist);
 
       if (!isExist) {
         throw new NotFoundException('User not found');
       }
+      console.log('exist update', isExist);
 
-      const updatedUser = await this.userRepository.findAndUpdate(id, {
-        // $set: { name: payload. },
-        // $push: { permissions: payload.permissions },
-        ...payload,
-      });
+      const updatedUser = await this.userRepository.findAndUpdate(
+        { _id: id },
+        {
+          // $set: { name: payload. },
+          // $push: { permissions: payload.permissions },
+          ...payload,
+        },
+      );
 
       return {
         statusCode: HttpStatus.OK,
@@ -376,6 +382,7 @@ export class UsersService {
         data: updatedUser,
       };
     } catch (error) {
+      console.log(error);
       if (error instanceof HttpException) {
         throw error;
       }

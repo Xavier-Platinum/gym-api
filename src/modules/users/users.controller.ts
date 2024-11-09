@@ -76,6 +76,35 @@ export class UsersController {
     return await this.usersService.findOne(user?._id);
   }
 
+  @Patch('/profile')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
+  async updateProfile(
+    @Req() req: Request,
+    @Body()
+    payload: Omit<
+      UpdateUserDto,
+      | 'email'
+      | 'phoneNumber'
+      | 'roles'
+      | 'confirmed'
+      | 'secretToken'
+      | 'status'
+      | 'statusReason'
+      | 'isSuperAdmin'
+      | 'isDeleted'
+      | 'subscriptions'
+      | 'deviceToken'
+      | 'id'
+      | '_id'
+      | ''
+    >,
+  ) {
+    const user = req.user as any;
+    console.log(user?._id);
+    return await this.usersService.update(user?._id, payload);
+  }
+
   @Post('/:id/:status')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin)
