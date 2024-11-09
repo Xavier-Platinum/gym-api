@@ -10,6 +10,12 @@ import { INotification } from '../interfaces';
   toJSON: { getters: true, virtuals: true, versionKey: false },
 })
 export class Notification extends Document implements INotification {
+  @Prop({ type: MongooseSchema.Types.ObjectId, default: null })
+  resourceId: any;
+
+  @Prop({ type: String, default: null })
+  tag: string;
+
   @Prop({ type: String })
   resourceUrl: string;
 
@@ -64,3 +70,24 @@ export class Notification extends Document implements INotification {
 
 export type NotificationDocument = Notification & Document;
 export const NotificationSchema = SchemaFactory.createForClass(Notification);
+
+NotificationSchema.methods.populateResource = async function () {
+  let model;
+
+  switch (this.tag) {
+    case 'Addon':
+      model = model('Addon');
+      break;
+    case 'Subscription':
+      model = model('Subscription');
+      break;
+    case 'Transaction':
+      model = model('Transaction');
+      break;
+    default:
+      throw new Error(`Unknown tag: ${this.tag}`);
+  }
+
+  this.resourceId = await model.findById(this.resourceId).exec();
+  return this;
+};

@@ -6,6 +6,8 @@ export interface INotification {
   title: string;
   body: string;
   resourceUrl: string;
+  resourceId: Schema.Types.ObjectId | any;
+  tag: string;
   type: 'general' | 'individual' | 'in_app';
   category: 'promotion' | 'alert' | 'reminder';
   priority: 'low' | 'medium' | 'high';

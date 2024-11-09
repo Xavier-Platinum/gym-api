@@ -67,11 +67,12 @@ export class NotificationsService {
 
   @OnEvent('sendBroadcast')
   async handleBroadcastEvent(notification: BroadcastCreateNotificationDto) {
+    console.log('BROADCAST>>>>>> ', notification);
     try {
-      const allUsers = await this.userRepository.byQuery({}, [
-        'deviceToken',
-        '_id',
-      ]);
+      const allUsers = await this.userRepository.all({
+        projections: ['deviceToken', '_id'],
+        conditions: {},
+      });
       const validTokens = allUsers
         .map((user) => user.deviceToken)
         .filter((token) => token && token.trim().length > 0);
@@ -111,6 +112,7 @@ export class NotificationsService {
 
   @OnEvent('BroadcastNotification')
   async BroadcastSendBroadcast(payload: CreateNotificationDto) {
+    console.log('BroadcastNotification>>>>>> ', payload);
     await this.createBroadcastNotification(payload);
   }
 
@@ -234,24 +236,30 @@ export class NotificationsService {
   ) {
     try {
       notificationData.type = 'general';
-      const allUsers = await this.userRepository.byQuery({}, [
-        'deviceToken',
-        '_id',
-      ]);
+      const allUsers = await this.userRepository.all({
+        projections: ['deviceToken', '_id'],
+        conditions: {},
+      });
+
+      console.log('USERS>>>', allUsers);
 
       // Create individual notifications for each user
       allUsers.map(async (user) => {
         await this.notificationRepository.create({
-          userId: user._id,
+          userId: user.id,
           title: notificationData.title,
           body: notificationData.body,
           type: notificationData.type,
+          tag: notificationData?.tag,
+          resourceId: notificationData?.resourceId,
           // status: false,
           // createdAt: new Date(),
         });
+        // Emit an event to trigger the batch FCM push notifications
+        // this.eventEmitter.emit('sendBroadcast', { ...notificationData });
       });
 
-      // Emit an event to trigger the batch FCM push notifications
+      // // Emit an event to trigger the batch FCM push notifications
       this.eventEmitter.emit('sendBroadcast', notificationData);
 
       return {
@@ -370,9 +378,9 @@ export class NotificationsService {
   // Retrieve a user's notifications
   async getUserNotifications(userId: any): Promise<any> {
     try {
-      const data = await this.notificationRepository.byQuery({
-        userId,
-        isArchived: false,
+      const data = await this.notificationRepository.all({
+        conditions: { userId: userId },
+        // isArchived: false,
       });
 
       return {

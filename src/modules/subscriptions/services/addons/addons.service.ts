@@ -46,15 +46,18 @@ export class AddonsService {
 
       this.eventEmitter.emit('BroadcastNotification', {
         title: 'Addons Notification',
-        body: JSON.stringify({
-          message: 'New addon added check it out.',
-          data: {
-            name: addon.name,
-            _id: addon?._id,
-            description: addon?.description,
-            image: addon?.image,
-          },
-        }),
+        // body: JSON.stringify({
+        //   message: 'New addon added check it out.',
+        //   data: {
+        //     name: addon.name,
+        //     _id: addon?._id,
+        //     description: addon?.description,
+        //     image: addon?.image,
+        //   },
+        // }),
+        body: 'New addon added check it out.',
+        tag: 'Addon',
+        resourceId: addon?._id,
       });
 
       return {

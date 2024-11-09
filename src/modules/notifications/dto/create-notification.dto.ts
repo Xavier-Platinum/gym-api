@@ -8,6 +8,8 @@ export class CreateNotificationDto {
   category?: 'promotion' | 'alert' | 'reminder';
   priority?: 'low' | 'medium' | 'high';
   scheduledAt?: Date;
+  resourceId?: Schema.Types.ObjectId | any;
+  tag?: string;
 }
 
 export class BroadcastCreateNotificationDto {
@@ -18,4 +20,6 @@ export class BroadcastCreateNotificationDto {
   category?: 'promotion' | 'alert' | 'reminder';
   priority?: 'low' | 'medium' | 'high';
   scheduledAt?: Date;
+  resourceId?: Schema.Types.ObjectId | any;
+  tag?: string;
 }

@@ -9,6 +9,7 @@ import {
 } from './entities/notification.schema';
 import { ServicesModule } from 'src/common/services/services.module';
 import { UsersModule } from '../users/users.module';
+import { BroadcastModule } from './broadcast/broadcast.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UsersModule } from '../users/users.module';
     ]),
     ServicesModule,
     UsersModule,
+    BroadcastModule,
   ],
   exports: [NotificationsService],
   controllers: [NotificationsController],
