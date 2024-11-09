@@ -96,7 +96,7 @@ export class AuthService {
 
   async register(payload: CreateUserDto) {
     try {
-      const isExist = await this.userRepository.exists({
+      const isEmailExist = await this.userRepository.exists({
         $or: [
           { email: payload?.email },
           // { fullName: payload?.fullName },
@@ -104,8 +104,20 @@ export class AuthService {
         ],
       });
 
-      if (isExist) {
-        throw new BadRequestException('User already exists');
+      const isPhoneExist = await this.userRepository.exists({
+        $or: [
+          // { email: payload?.email },
+          // { fullName: payload?.fullName },
+          { phoneNumber: payload?.phoneNumber },
+        ],
+      });
+
+      if (isEmailExist) {
+        throw new BadRequestException('This email already exists');
+      }
+
+      if (isPhoneExist) {
+        throw new BadRequestException('This phone number already exists');
       }
 
       const role = await this.rolesRepository.byQuery({ name: 'User' });
