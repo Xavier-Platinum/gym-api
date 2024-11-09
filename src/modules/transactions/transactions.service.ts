@@ -84,6 +84,8 @@ export class TransactionsService {
             amount: transactions?.amount,
           },
         }),
+        resourceId: transactions?._id,
+        tag: 'Transaction',
       });
 
       return {

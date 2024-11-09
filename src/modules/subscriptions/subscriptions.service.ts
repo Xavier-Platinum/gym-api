@@ -50,15 +50,18 @@ export class SubscriptionsService {
 
       this.eventEmitter.emit('BroadcastNotification', {
         title: 'Subscriptions Notification',
-        body: JSON.stringify({
-          message: 'New subscriptions added check it out.',
-          data: {
-            name: subscription.name,
-            _id: subscription?._id,
-            description: subscription?.description,
-            image: subscription?.image,
-          },
-        }),
+        // body: JSON.stringify({
+        //   message: 'New subscriptions added check it out.',
+        //   data: {
+        //     name: subscription.name,
+        //     _id: subscription?._id,
+        //     description: subscription?.description,
+        //     image: subscription?.image,
+        //   },
+        // }),
+        body: 'New subscriptions added check it out.',
+        tag: 'Subscription',
+        resourceId: subscription?._id,
       });
 
       return {
