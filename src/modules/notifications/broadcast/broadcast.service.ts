@@ -8,16 +8,39 @@ import { BroadcastRepository } from './entities/broadcast.repository';
 import { CreateBroadcastDto } from './dto/create-broadcast.dto';
 import { UpdateBroadcastDto } from './dto/update-broadcast.dto';
 import { IBroadcast } from './interfaces/index';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class BroadcastService {
-  constructor(private readonly broadcastRepository: BroadcastRepository) {}
+  constructor(
+    private readonly broadcastRepository: BroadcastRepository,
+    private eventEmitter: EventEmitter2,
+  ) {}
 
   async createBroadcast(
     payload: CreateBroadcastDto,
   ): Promise<IBroadcast | any> {
-    const data = this.broadcastRepository.create(payload);
-    return data;
+    const data = await this.broadcastRepository.create(payload);
+    this.eventEmitter.emit('BroadcastNotification', {
+      title: 'Broadcast Notification',
+      // body: JSON.stringify({
+      //   message: 'New addon added check it out.',
+      //   data: {
+      //     name: addon.name,
+      //     _id: addon?._id,
+      //     description: addon?.description,
+      //     image: addon?.image,
+      //   },
+      // }),
+      body: 'New broadcaat added check it out.',
+      tag: 'Broadcast',
+      resourceId: data?._id,
+    });
+    return {
+      statusCode: 201,
+      message: 'Broadcast created successfully',
+      data: data,
+    };
   }
 
   async getBroadcastById(id: string): Promise<IBroadcast | any> {
@@ -90,7 +113,7 @@ export class BroadcastService {
 
   async getAllBroadcasts(): Promise<IBroadcast[] | any> {
     try {
-      const data = this.broadcastRepository.all({});
+      const data = await this.broadcastRepository.all({});
       return {
         statusCode: 200,
         message: 'All broadcasts retrieved successfully',
