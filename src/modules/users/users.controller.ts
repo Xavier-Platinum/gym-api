@@ -129,7 +129,7 @@ export class UsersController {
     @Req() req: { user: any },
   ) {
     const id = req.user._id;
-    return this.usersService.updateProfilePicture(id, file.path);
+    return this.usersService.updateProfilePicture(id, file);
   }
 
   @Get()

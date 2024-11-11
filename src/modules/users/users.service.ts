@@ -108,7 +108,8 @@ export class UsersService {
     return orConditions.length > 0 ? { $or: orConditions } : {};
   }
 
-  async updateProfilePicture(userId: any, file: any) {
+  async updateProfilePicture(userId: any, file: Express.Multer.File) {
+    console.log('USER ID>>>>> ', userId, file);
     const user = await this.userRepository.byID(userId);
 
     // Delete the previous profile picture if it exists
@@ -125,12 +126,14 @@ export class UsersService {
     );
 
     // Update the user's profile picture URL and public ID in the database
-    await this.userRepository.update(
+    await this.userRepository.findAndUpdate(
       { _id: userId },
       {
-        ProfilePicture: uploadResult.secure_url,
-        profilePictureMetaData: {
-          publicId: uploadResult.public_id,
+        $set: {
+          ProfilePicture: uploadResult.secure_url,
+          profilePictureMetaData: {
+            publicId: uploadResult.public_id,
+          },
         },
       },
     );
