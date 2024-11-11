@@ -424,7 +424,7 @@ export class AuthService {
         throw new HttpException('auth-token header is required', 400);
       }
 
-      if (payload.password) {
+      if (!payload.password) {
         throw new HttpException('password is required', 400);
       }
 
