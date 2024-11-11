@@ -84,7 +84,7 @@ export class SubscribeItemDto {
 
   @IsNumber()
   @Type(() => Number)
-  readonly duration: number;
+  duration: number;
 
   @IsBoolean()
   @Type(() => Boolean)

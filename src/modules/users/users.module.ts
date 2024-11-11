@@ -18,6 +18,7 @@ import { CloudinaryService } from 'src/common/services/cloudinary/cloudinary.ser
 import { PackagesService } from './services/packages/packages.service';
 import { PackagesController } from './controllers/packages/packages.controller';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
+import { JobsService } from './jobs/jobs.service';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
     CloudinaryService,
     PackagesService,
     UserPackageRepository,
+    JobsService,
   ],
   exports: [
     UsersService,

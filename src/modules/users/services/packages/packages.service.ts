@@ -29,9 +29,10 @@ export class PackagesService {
 
   @OnEvent('order.verified')
   async updatePackageStatus(payload: any): Promise<void> {
+    const pkg = await this.userPackageRepository.byID(payload?.package);
     const startDate = new Date();
     const endDate = new Date(startDate);
-    endDate.setDate(startDate.getDate() + 30);
+    endDate.setDate(startDate.getDate() + pkg.duration);
 
     await this.userPackageRepository.findAndUpdate(
       { _id: payload.package },
@@ -59,6 +60,12 @@ export class PackagesService {
       //     400,
       //   );
       // }
+
+      if (payload?.item?.duration > 12) {
+        throw new HttpException('Duration should not exceed 12 months', 400);
+      }
+
+      payload.item.duration = payload.item.duration * 30;
 
       console.log('Here');
 
