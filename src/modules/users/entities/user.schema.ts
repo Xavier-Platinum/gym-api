@@ -235,26 +235,27 @@ UserSchema.pre('save', async function (next) {
   next();
 });
 
-// Hash password before updating the document
-UserSchema.pre('findOneAndUpdate', async function (next) {
-  const update = this.getUpdate() as Partial<UserDocument>;
-  if (update.password) {
-    const salt = await bcrypt.genSalt(10);
-    update.password = await bcrypt.hash(update.password, salt);
-    this.setUpdate(update);
-  }
+// // Hash password before updating the document
+// UserSchema.pre('findOneAndUpdate', async function (next) {
+//   console.log('YOU HIT ME>>>>>>');
+//   const update = this.getUpdate() as Partial<UserDocument>;
+//   if (update.password) {
+//     const salt = await bcrypt.genSalt(10);
+//     update.password = await bcrypt.hash(update.password, salt);
+//     this.setUpdate(update);
+//   }
 
-  next();
-});
+//   next();
+// });
 
-// Hash password before updating the document
-UserSchema.pre('findOneAndReplace', async function (next) {
-  const update = this.getUpdate() as Partial<UserDocument>;
-  if (update.password) {
-    const salt = await bcrypt.genSalt(10);
-    update.password = await bcrypt.hash(update.password, salt);
-    this.setUpdate(update);
-  }
+// // Hash password before updating the document
+// UserSchema.pre('findOneAndReplace', async function (next) {
+//   const update = this.getUpdate() as Partial<UserDocument>;
+//   if (update.password) {
+//     const salt = await bcrypt.genSalt(10);
+//     update.password = await bcrypt.hash(update.password, salt);
+//     this.setUpdate(update);
+//   }
 
-  next();
-});
+//   next();
+// });

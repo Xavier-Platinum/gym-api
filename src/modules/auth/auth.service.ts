@@ -20,6 +20,7 @@ import moment from 'moment';
 import { UserRepository } from '../users/entities/user.repository';
 import { RoleRepository } from './entities/auth.repository';
 import { CreateUserDto } from '../users/dto/create-user.dto';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class AuthService {
@@ -427,6 +428,7 @@ export class AuthService {
   }
 
   async resetPassword(token: string, payload: any): Promise<any> {
+    console.log('PAYLOAD>>> ', token, payload);
     try {
       if (!token) {
         throw new HttpException('auth-token header is required', 400);
@@ -448,8 +450,11 @@ export class AuthService {
       if (!user) {
         throw new NotFoundException('User not found');
       }
+      const salt = await bcrypt.genSalt(10);
+      const newPassword = await bcrypt.hash(payload.password, salt);
+
       await this.userRepository.findAndUpdate(user._id, {
-        $set: { password: payload.password },
+        $set: { password: newPassword },
       });
 
       return {
