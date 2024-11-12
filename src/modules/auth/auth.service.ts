@@ -11,7 +11,7 @@ import {
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { ObjectId } from 'mongoose';
-import { JwtService } from '@nestjs/jwt';
+import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { EmailService } from 'src/common/services/email/email.service';
 import { ConfigService } from '@nestjs/config';
@@ -378,7 +378,7 @@ export class AuthService {
 
   async verifyToken(token: string, payload: any): Promise<any> {
     try {
-      const decoded = this.jwtService.verify(token, {
+      const decoded = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
 
@@ -386,7 +386,7 @@ export class AuthService {
         throw new HttpException('Token verification failed or expired', 400);
       }
 
-      const user = await this.userService.findUserByToken(payload.token);
+      const user = await this.userService.findUserByEmail(decoded.email);
 
       if (!user || user.authToken === 'null') {
         throw new NotFoundException('Verification failed, please try again');
@@ -410,9 +410,17 @@ export class AuthService {
         data: newToken,
       };
     } catch (error) {
-      console.log(error);
-      if (error instanceof HttpException) {
-        throw error;
+      if (error instanceof JsonWebTokenError) {
+        if (error?.message === 'jwt expired') {
+          throw new HttpException('Token session expired.', 400);
+        }
+        throw new HttpException(error?.message, 400);
+      }
+      if (
+        error instanceof HttpException ||
+        error.message === 'User not found'
+      ) {
+        throw new HttpException('Verification failed or invalid token', 400);
       }
       throw new InternalServerErrorException();
     }
@@ -428,7 +436,7 @@ export class AuthService {
         throw new HttpException('password is required', 400);
       }
 
-      const decoded = this.jwtService.verify(token, {
+      const decoded = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('JWT_SECRET'),
       });
 
@@ -449,9 +457,17 @@ export class AuthService {
         message: 'Password reset successfully',
       };
     } catch (error) {
-      console.error(error);
-      if (error instanceof HttpException) {
-        throw error;
+      if (error instanceof JsonWebTokenError) {
+        if (error?.message === 'jwt expired') {
+          throw new HttpException('Session expired please try again.', 400);
+        }
+        throw new HttpException(error?.message, 400);
+      }
+      if (
+        error instanceof HttpException ||
+        error.message === 'User not found'
+      ) {
+        throw new HttpException('Verification failed or invalid token', 400);
       }
       throw new InternalServerErrorException();
     }

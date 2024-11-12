@@ -282,37 +282,31 @@ export class UsersService {
   }
 
   async findUserByToken(authToken: string): Promise<any> {
-    try {
-      const user = await this.userRepository.byQuery(
-        { authToken: authToken },
-        null,
-        null,
-        [
-          {
-            path: 'roles.roleId',
-            model: 'Role',
-            // select: '-createdAt -updatedAt',
-          },
-          // {
-          //   path: 'subscriptions.subscriptionId',
-          //   model: 'Subscription',
-          //   // select: '-createdAt -updatedAt',
-          // },
-        ],
-        '-createdAt',
-      );
+    const user = await this.userRepository.byQuery(
+      { authToken: authToken },
+      null,
+      null,
+      [
+        {
+          path: 'roles.roleId',
+          model: 'Role',
+          // select: '-createdAt -updatedAt',
+        },
+        // {
+        //   path: 'subscriptions.subscriptionId',
+        //   model: 'Subscription',
+        //   // select: '-createdAt -updatedAt',
+        // },
+      ],
+      '-createdAt',
+    );
+    console.log(user);
 
-      if (!user) {
-        throw new NotFoundException('User not found');
-      }
-
-      return user;
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException();
+    if (!user) {
+      throw new HttpException('User not found', 400);
     }
+
+    return user;
   }
 
   async findOne(id: string): Promise<any> {

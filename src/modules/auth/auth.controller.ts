@@ -97,7 +97,7 @@ export class AuthController {
     const token = req.headers?.['auth-token'] as string;
 
     if (!token) {
-      throw new BadRequestException('Token is required');
+      throw new BadRequestException('auth-token header is required');
     }
 
     return this.authService.verifyToken(token, payload);
@@ -111,7 +111,7 @@ export class AuthController {
     const token = req.headers?.['auth-token'] as string;
 
     if (!token) {
-      throw new HttpException('Token is required', 400);
+      throw new HttpException('auth-token header is required', 400);
     }
 
     return this.authService.resetPassword(token, payload);
