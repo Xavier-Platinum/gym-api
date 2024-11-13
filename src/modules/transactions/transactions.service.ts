@@ -269,14 +269,14 @@ export class TransactionsService {
   }
 
   async history(userId: any) {
+    console.log('USER ID>>', userId);
     try {
-      const sub = await this.transactionRepository.byQuery(
-        {
+      const sub = await this.transactionRepository.all({
+        conditions: {
           userId: userId,
         },
-        null,
-        null,
-        [
+        sort: '-createdAt',
+        populate: [
           {
             path: 'userId',
             model: 'User',
@@ -315,8 +315,7 @@ export class TransactionsService {
             ],
           },
         ],
-        '-createdAt',
-      );
+      });
 
       if (!sub) {
         throw new NotFoundException('Subscription not found');

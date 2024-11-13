@@ -65,6 +65,13 @@ export class PackagesService {
         throw new HttpException('Duration should not exceed 12 months', 400);
       }
 
+      if (payload?.item?.duration < 1) {
+        throw new HttpException(
+          'Duration should not be less than 1 month',
+          400,
+        );
+      }
+
       payload.item.duration = payload.item.duration * 30;
 
       console.log('Here');

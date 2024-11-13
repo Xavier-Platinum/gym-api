@@ -6,6 +6,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto, PaginateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -14,7 +15,9 @@ import { UserRepository } from './entities/user.repository';
 import { EmailService } from 'src/common/services/email/email.service';
 import { RoleRepository } from '../auth/entities/auth.repository';
 import { CloudinaryService } from 'src/common/services/cloudinary/cloudinary.service';
+import * as bcrypt from 'bcryptjs';
 import { AuthService } from '../auth/auth.service';
+import { User } from './entities/user.schema';
 
 @Injectable()
 export class UsersService {
@@ -307,6 +310,37 @@ export class UsersService {
     }
 
     return user;
+  }
+
+  async changePassword(
+    userId: any,
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<any> {
+    try {
+      const user: any = await this.userRepository.byID(userId);
+
+      if (!user || !(await user?.comparePassword(oldPassword))) {
+        throw new UnauthorizedException('Old password is incorrect');
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const updatedPassword = await bcrypt.hash(newPassword, salt);
+
+      await this.userRepository.findAndUpdate(userId, {
+        $set: { password: updatedPassword },
+      });
+
+      return {
+        statusCode: HttpStatus.NO_CONTENT,
+        message: 'Password changed successfully',
+      };
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException();
+    }
   }
 
   async findOne(id: string): Promise<any> {
