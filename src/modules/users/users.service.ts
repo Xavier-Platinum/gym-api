@@ -318,24 +318,34 @@ export class UsersService {
     newPassword: string,
   ): Promise<any> {
     try {
-      const user: any = await this.userRepository.byID(userId);
+      const user: any = await this.userRepository.byQuery(
+        {
+          _id: userId,
+        },
+        'password',
+      );
+      console.log(user);
 
-      if (!user || !(await user?.comparePassword(oldPassword))) {
+      if (!user || !(await bcrypt.compareSync(oldPassword, user?.password))) {
         throw new UnauthorizedException('Old password is incorrect');
       }
 
       const salt = await bcrypt.genSalt(10);
       const updatedPassword = await bcrypt.hash(newPassword, salt);
 
-      await this.userRepository.findAndUpdate(userId, {
-        $set: { password: updatedPassword },
-      });
+      await this.userRepository.findAndUpdate(
+        { _id: userId },
+        {
+          $set: { password: updatedPassword },
+        },
+      );
 
       return {
-        statusCode: HttpStatus.NO_CONTENT,
+        statusCode: HttpStatus.OK,
         message: 'Password changed successfully',
       };
     } catch (error) {
+      console.error(error);
       if (error instanceof HttpException) {
         throw error;
       }
