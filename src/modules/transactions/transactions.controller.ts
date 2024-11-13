@@ -71,18 +71,20 @@ export class TransactionsController {
     );
   }
 
+  @Get('/user')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
+  async history(@Req() req: { user: any }) {
+    const id = req.user._id;
+    console.log('USER HERE');
+    return await this.transactionsService.history(id);
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
   async findOne(@Param('id') id: any) {
     return await this.transactionsService.findOne(id);
-  }
-
-  @Get('/user/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
-  async history(@Param('userId') id: any) {
-    return await this.transactionsService.history(id);
   }
 
   @Patch(':id')

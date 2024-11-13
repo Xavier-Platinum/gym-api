@@ -32,6 +32,17 @@ export class SubscriptionsService {
         throw new HttpException('Subscription already exists', 409);
       }
 
+      if (payload?.durationInMonths > 12) {
+        throw new HttpException('Duration should not exceed 12 months', 400);
+      }
+
+      if (payload?.durationInMonths < 1) {
+        throw new HttpException(
+          'Duration should not be less than 1 month',
+          400,
+        );
+      }
+
       if (image) {
         const response = await this.uploadService.uploadImage(
           image,
@@ -170,6 +181,17 @@ export class SubscriptionsService {
 
       if (!isExist) {
         throw new NotFoundException('Subscription not found');
+      }
+
+      if (payload?.durationInMonths > 12) {
+        throw new HttpException('Duration should not exceed 12 months', 400);
+      }
+
+      if (payload?.durationInMonths < 1) {
+        throw new HttpException(
+          'Duration should not be less than 1 month',
+          400,
+        );
       }
 
       if (image) {

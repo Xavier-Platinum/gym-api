@@ -105,6 +105,23 @@ export class UsersController {
     return await this.usersService.update(user?._id, payload);
   }
 
+  @Patch('/updatePassword')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(ROLES.SuperAdmin, ROLES.User, ROLES.Admin)
+  async updatePassword(
+    @Req() req: Request,
+    @Body()
+    payload: { oldPassword: string; newPassword: string },
+  ) {
+    const user = req.user as any;
+    console.log(user?._id);
+    return await this.usersService.changePassword(
+      user?._id,
+      payload?.oldPassword,
+      payload?.newPassword,
+    );
+  }
+
   @Post('/:id/:status')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SuperAdmin)
